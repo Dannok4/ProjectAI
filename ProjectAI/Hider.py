@@ -81,9 +81,41 @@ class Hider:
         x, y = self.announce_position
         full_map[y][x] = 5 # signal for announcement
            
-    def look_around(self, board):
-        x, y = self.position
+    def look_around(self, board): # return position of seeker
+        x_hider, y_hider = self.position
+        x_seeker, y_seeker = -1, 0
         
         for i in range(max(y-2, 0), min(y+2, board.n)):
             for j in range(max(x-2, 0), min(x+2, board.m)):
-                if (board[i][j] == )
+                if board[i][j] == 3:
+                    x_seeker = j
+                    y_seeker = i
+                    
+        if x_seeker != -1: # saw seeker
+            x_vector, y_vector = x_seeker - x_hider, y_seeker - y_hider # cal vector to have direction
+            
+            if (abs(x_vector) == 1 and y_vector == 0) or (x_vector == 0 and abs(y_vector) == 1): # side-by-side in straight
+                return (x_seeker, y_seeker) # accepted sight
+            
+            if abs(x_vector) == 1 and abs(y_vector) == 1: # side-by-side in diagonal
+                if (board[y_seeker][x_hider] != 0 and board[y_seeker][x_hider] != 2) and (board[y_hider][x_seeker] != 0 and board[y_hider][x_seeker] != 2): # blocked sight
+                    return (-1, 0) # not see
+                else: return (x_seeker, y_seeker) # accepted sight
+            
+            if (abs(x_vector) == 2 and y_vector == 0) or (x_vector == 0 and abs(y_vector) == 2): # in straight
+                if (board[y_hider + y_vector/2][x_hider + x_vector/2] != 0 and board[y_hider + y_vector/2][x_hider + x_vector/2] != 2): # blocked sight
+                    return (-1, 0) # not see
+                else: return (x_seeker, y_seeker) # accepted sight
+        
+            if abs(x_vector) == 2 and abs(y_vector) == 2: # in diagonal
+                if (board[y_hider + y_vector/2][x_hider] != 0 and board[y_hider + y_vector/2][x_hider] != 2) and (board[y_hider][x_hider + x_vector/2] != 0 and board[y_hider][x_hider + x_vector/2] != 2): # blocked sight (near hider)
+                    return (-1, 0) # not see
+                elif (board[y_seeker - y_vector/2][x_seeker] != 0 and board[y_seeker - y_vector/2][x_seeker] != 2) and (board[y_seeker][x_seeker - x_vector/2] != 0 and board[y_seeker][x_seeker - x_vector/2] != 2): # blocked sight (near seeker)
+                    return (-1, 0) # not see
+                elif board[y_hider + y_vector/2][x_hider + x_vector/2] != 0 and board[y_hider + y_vector/2][x_hider + x_vector/2] != 2: # blocked sight (in diagonal)
+                    return (-1, 0) # not see
+                else: return (x_seeker, y_seeker) # accepted sight
+                
+                # ... other cell ...
+            
+        return (-1, 0) # not see

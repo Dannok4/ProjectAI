@@ -1,5 +1,6 @@
 import sys
 import pygame
+import heapq
 class Seeker:
     def __init__(self, position, vision_radius, bound, map, score=0):
         self.position = position
@@ -198,7 +199,7 @@ class Seeker:
                 elif self.position[0] + row < self.bound[0] and self.position[1] + col < self.bound[1]:
                     self.invalid_vision_down_right.append((self.position[0] + row, self.position[1] + col))
 
-    def agent_valid_vision(self):
+    def seeker_valid_vision(self):
         self.check_vision_left()
         self.check_vision_right()
         self.check_vision_up()
@@ -209,29 +210,71 @@ class Seeker:
         self.check_vision_down_left()
         self.check_vision_down_right()
 
-    def agent_go_right(self):
+    def seeker_go_right(self):
         self.position = tuple(map(sum, zip(self.position, self.direction[0])))
     
-    def agent_go_left(self):
+    def seeker_go_left(self):
         self.position = tuple(map(sum, zip(self.position, self.direction[1])))
 
-    def agent_go_down(self):
+    def seeker_go_down(self):
         self.position = tuple(map(sum, zip(self.position, self.direction[2])))
 
-    def agent_go_up(self):
+    def seeker_go_up(self):
         self.position = tuple(map(sum, zip(self.position, self.direction[3])))
     
-    def agent_go_down_right(self):
+    def seeker_go_down_right(self):
         self.position = tuple(map(sum, zip(self.position, self.direction[4])))
 
-    def agent_go_down_left(self):
+    def seeker_go_down_left(self):
         self.position = tuple(map(sum, zip(self.position, self.direction[5])))
 
-    def agent_go_up_right(self):
+    def seeker_go_up_right(self):
         self.position = tuple(map(sum, zip(self.position, self.direction[6])))
 
-    def agent_go_up_left(self):
+    def seeker_go_up_left(self):
         self.position = tuple(map(sum, zip(self.position, self.direction[7])))
         
-    def A_star_searching()
-print("fuck")
+def manhattan_distance(a, b):
+    return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
+def neighbors(node):
+    x, y = node
+    return [(x+1, y), (x-1, y), (x, y+1), (x, y-1)]  # Assuming 4-connected neighbors
+
+def a_star_search(start, goal, heuristic, neighbors_fn):
+    open_set = []
+    closed_set = set()
+    heapq.heappush(open_set, (0 + heuristic(start, goal), 0, start, []))
+
+    while open_set:
+        _, g, current, path = heapq.heappop(open_set)
+
+        if current == goal:
+            return path + [current]
+        if current in closed_set:
+            continue
+        closed_set.add(current)
+        for neighbor in neighbors_fn(current):
+            if neighbor in closed_set:
+                continue
+            new_g = g + 1
+            heapq.heappush(open_set, (new_g + heuristic(neighbor, goal), new_g, neighbor, path + [current]))
+
+    return None
+
+# Example usage:
+start = (0, 0)
+goal = (5, 5)
+map = [[0, 0, 0, 0, 0, 0],
+       [0, 1, 1, 1, 1, 0],
+       [0, 1, 0, 0, 0, 0],
+       [0, 1, 0, 1, 1, 0],
+       [0, 0, 0, 0, 0, 0]]
+
+seeker = Seeker(start, 1, (len(map), len(map[0])), map)
+path = a_star_search(start, goal, manhattan_distance, neighbors)
+
+if path:
+    print("Path found:", path)
+else:
+    print("No path found.")

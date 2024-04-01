@@ -35,9 +35,9 @@ class Hider:
             else: return False
         else: return False
 
-    def move(self, direction, map_with_objects):
+    def move(self, direction, board):
         # Check if movement is valid
-        if self.check_valid_move(map_with_objects, direction):
+        if self.check_valid_move(board, direction):
             return 0
         
         # Move function for hider          
@@ -68,10 +68,9 @@ class Hider:
         self.steps += 1
         
         if self.steps % 5 == 0:  # make a signal each 5 steps
-            self.signal()
+            self.announce(board)
 
-    def announce(self, full_map):
-        # Make an announcement
+    def announce(self, full_map): # Make an announcement
         pre_announce_x, pre_announce_y = self.announce_position
         
         if pre_announce_x != -1: # already announce previously

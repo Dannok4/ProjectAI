@@ -80,8 +80,6 @@ class Hider:
         self.announce_position = self.position
         x, y = self.announce_position
         full_map[y][x] = 5 # signal for announcement
-        
-
            
     def look_around(self, board):
         x, y = self.position

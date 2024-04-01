@@ -232,4 +232,6 @@ class Seeker:
 
     def agent_go_up_left(self):
         self.position = tuple(map(sum, zip(self.position, self.direction[7])))
+        
+    def A_star_searching()
 print("fuck")

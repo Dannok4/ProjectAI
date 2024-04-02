@@ -1,4 +1,5 @@
-﻿from Board import Board
+﻿import random
+from Board import Board
 
 class Hider:
     def __init__(self, name, x, y):
@@ -7,11 +8,11 @@ class Hider:
         self.steps = 0
         self.announce_position = (-1, 0)
         
-    def check_valid_move(self, Board, direction):
+    def check_valid_move(self, m, n, Board, direction):
         x, y = self.position
         
         # check valid movement for hider
-        if 0 <= x < Board.m and 0 <= y < Board.n:
+        if 0 <= x < m and 0 <= y < n:
             if Board[y][x] == 0:
                 if direction == "left" or direction == "right" or direction == "up" or direction == "down":
                     return True
@@ -35,7 +36,7 @@ class Hider:
             else: return False
         else: return False
 
-    def move(self, direction, board):
+    def move(self, direction, m, n, board):
         # Check if movement is valid
         if self.check_valid_move(board, direction):
             return 0
@@ -68,24 +69,32 @@ class Hider:
         self.steps += 1
         
         if self.steps % 5 == 0:  # make a signal each 5 steps
-            self.announce(board)
+            self.announce(m, n, board)
 
-    def announce(self, full_map): # Make an announcement
+    def announce(self, m, n, map): # Make an announcement
         pre_announce_x, pre_announce_y = self.announce_position
         
         if pre_announce_x != -1: # already announce previously
-            full_map[pre_announce_y][pre_announce_x] = 0 # delete previous announcement
+            [pre_announce_y][pre_announce_x] = 0 # delete previous announcement
         
-        self.announce_position = self.position
-        x, y = self.announce_position
-        full_map[y][x] = 5 # signal for announcement
+        rand_announce = random.randint(1, 49) # random position
+        
+        x_hider, y_hider = self.position
+        
+        dem = 1;
+        for i in range(max(y_hider - 3, 0), min(y_hider + 3, n - 1)):
+            for j in range(max(x_hider - 3, 0), min(x_hider + 3, m - 1)):
+                if dem == rand_announce: # correct position to announce
+                    map[i][j] = 5 # signal for an announcement
+                    return
+                else: dem += 1 # not correct, find another
            
-    def look_around(self, board): # return position of seeker
+    def look_around(self, m, n, board): # return position of seeker
         x_hider, y_hider = self.position
         x_seeker, y_seeker = -1, 0
         
-        for i in range(max(y-2, 0), min(y+2, board.n)):
-            for j in range(max(x-2, 0), min(x+2, board.m)):
+        for i in range(max(y_hider - 2, 0), min(y_hider + 2, n - 1)):
+            for j in range(max(x_hider - 2, 0), min(x_hider + 2, m - 1)):
                 if board[i][j] == 3:
                     x_seeker = j
                     y_seeker = i
@@ -114,7 +123,10 @@ class Hider:
                 elif board[y_hider + y_vector/2][x_hider + x_vector/2] != 0 and board[y_hider + y_vector/2][x_hider + x_vector/2] != 2: # blocked sight (in diagonal)
                     return (-1, 0) # not see
                 else: return (x_seeker, y_seeker) # accepted sight
-                
-                # ... other cell ...
-            
+             
+            # in other positions (8 others)
+            if (board[y_hider + y_vector/2][x_hider + x_vector/2] != 0 and board[y_hider + y_vector/2][x_hider + x_vector/2] != 2) and (board[y_seeker - y_vector/2][x_seeker - x_vector/2] != 0 and board[y_seeker - y_vector/2][x_seeker - x_vector/2] != 2): # blocked sight
+                return (-1, 0) # not see
+            else: return (x_seeker, y_seeker) # accepted sight
+
         return (-1, 0) # not see

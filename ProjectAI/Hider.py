@@ -63,22 +63,16 @@ class Hider:
             
         return self.position
 
-    def announce(self, board): # Make an announcement
-        pre_announce_x, pre_announce_y = self.announce_position
-        
-        if pre_announce_x != -1: # already announce previously
-            board.map_with_objects[pre_announce_y][pre_announce_x] = 0 # delete previous announcement
-        
+    def announce(self, board): # return position of announcement     
         rand_announce = random.randint(1, 49) # random position
-        
         x_hider, y_hider = self.position
         
         dem = 1;
         for i in range(max(y_hider - 3, 0), min(y_hider + 3, board.n - 1)):
             for j in range(max(x_hider - 3, 0), min(x_hider + 3, board.m - 1)):
                 if dem == rand_announce: # correct position to announce
-                    board.map_with_objects[i][j] = 5 # signal for an announcement
-                    return
+                    self.announce_position = j, i # save announce position
+                    return (j, i)
                 else: dem += 1 # not correct, find another
            
     def look_around(self, board): # return position of seeker

@@ -9,13 +9,11 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 
-# Define cell size and margin
-CELL_SIZE = 30
-MARGIN = 2
+MARGIN = 1
 
-class Board:
+class Board:    
     def __init__(self, file_name):
-        self.map_with_objects, self.n, self.m, self.obstacles = self.create_map(file_name)
+        self.map_with_objects, self.n, self.m, self.obstacles, self.CELL_SIZE = self.create_map(file_name)
         self.seeker_pos = None
 
     # Đọc file và tạo map bằng ký tự
@@ -23,6 +21,15 @@ class Board:
         with open(file_name, 'r') as file:
             n, m = map(int, file.readline().split())
             map_matrix = [[' ' for _ in range(m)] for _ in range(n)]
+            #Xác định kích thước mỗi ô vuông trong bảng
+            if max(m, n) <= 50:
+                CELL_SIZE = 15
+            elif max(m, n) <= 100:
+                CELL_SIZE = 6
+            elif max(m, n) <= 150:
+                CELL_SIZE = 4
+            else:
+                CELL_SIZE = 3
 
             for i in range(n):
                 row = list(map(int, file.readline().split()))
@@ -64,10 +71,10 @@ class Board:
                 else:
                     print("Invalid obstacle format:", obstacle)
             
-            return map_with_objects, n, m, obstacles
+            return map_with_objects, n, m, obstacles, CELL_SIZE
 
     # Vẽ map bằng đồ họa
-    def draw_map(self, screen):
+    def draw_map(self, screen, CELL_SIZE):
         screen_width = self.m * (CELL_SIZE + MARGIN) + MARGIN * 2
         screen_height = self.n * (CELL_SIZE + MARGIN) + MARGIN * 2
 
@@ -123,7 +130,11 @@ class Seeker:
                 self.board.map_with_objects[target_row][target_col] = 'S'
                 self.seeker_pos = (target_row, target_col)
             elif self.board.map_with_objects[target_row][target_col] == 'X':   
-                self.move_obstacle(direction, target_row, target_col)
+                success = self.move_obstacle(direction, target_row, target_col)
+                if success:
+                    self.board.map_with_objects[row][col] = ' '
+                    self.board.map_with_objects[target_row][target_col] = 'S'
+                    self.seeker_pos = (target_row, target_col)
 
     # Di chuyển khối vật cản  
     def move_obstacle(self, direction, target_row, target_col):
@@ -148,21 +159,21 @@ class Seeker:
         if direction == 'up':
             for i in range(left, right + 1):
                 if(top < 1 or self.board.map_with_objects[top - 1][i] in ['#', 'X']):
-                    return 
+                    return False
             self.board.map_with_objects[top - 1][left:right + 1] = ['X'] * (right - left + 1)
             self.board.map_with_objects[bottom][left:right + 1] = [' '] * (right - left + 1)
             self.board.obstacles[obstacle_site] = (top - 2, left - 1, bottom - 2, right - 1)
         elif direction == 'down':
             for i in range(left, right + 1):
                 if(bottom > self.board.n - 3 or self.board.map_with_objects[bottom + 1][i] in ['#', 'X']):
-                    return
+                    return False
             self.board.map_with_objects[bottom + 1][left:right + 1] = ['X'] * (right - left + 1)
             self.board.map_with_objects[top][left:right + 1] = [' '] * (right - left + 1)
             self.board.obstacles[obstacle_site] = (top, left - 1, bottom, right - 1)
         elif direction == 'left':
             for i in range(top, bottom + 1):
                 if(left < 1 or self.board.map_with_objects[i][left - 1] in ['#', 'X']):
-                    return
+                    return False
             for i in range(top, bottom + 1):
                 self.board.map_with_objects[i][left - 1] = 'X'
                 self.board.map_with_objects[i][right] = ' '
@@ -170,8 +181,9 @@ class Seeker:
         elif direction == 'right':
             for i in range(top, bottom + 1):
                 if(right > self.board.m - 3 or self.board.map_with_objects[i][right + 1] in ['#', 'X']):
-                    return 
+                    return False
             for i in range(top, bottom + 1):
                     self.board.map_with_objects[i][right + 1] = 'X'
                     self.board.map_with_objects[i][left] = ' '          
             self.board.obstacles[obstacle_site] = (top - 1, left, bottom - 1, right)
+        return True

@@ -1,12 +1,16 @@
-﻿from Board import pygame
+﻿import pygame
+from Board import *
 
 def main():
     pygame.init()
-    # Tạo map
-    game_map = Board('map1_1.txt')  
-    screen_width = (CELL_SIZE + MARGIN) * game_map.m + MARGIN
-    screen_height = (CELL_SIZE + MARGIN) * game_map.n + MARGIN
+    game_map = Board('random_map_200x200.txt')  
+
+    # Calculate the size of the game window based on the size of the game board and the cell size
+    screen_width = game_map.m * (game_map.CELL_SIZE + MARGIN) + MARGIN * 2
+    screen_height = game_map.n * (game_map.CELL_SIZE + MARGIN) + MARGIN * 2
     screen_size = (screen_width, screen_height)
+
+    # Create the game window
     screen = pygame.display.set_mode(screen_size)
     pygame.display.set_caption("Map Representation")
 
@@ -15,7 +19,6 @@ def main():
     done = False
     clock = pygame.time.Clock()
 
-    # Kiểm tra sự kiện nhấn phím
     while not done:
         moved_this_loop = False
         
@@ -36,8 +39,10 @@ def main():
                     elif event.key == pygame.K_s:
                         seeker.move('down')
                         moved_this_loop = True                    
-        # Cập nhật lại map sau khi di chuyển
-        game_map.draw_map(screen)
+
+        # Draw the game map
+        game_map.draw_map(screen, game_map.CELL_SIZE)
+
         pygame.display.flip()
         clock.tick(60)
     

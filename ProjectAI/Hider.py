@@ -117,3 +117,24 @@ class Hider:
             else: return (x_seeker, y_seeker) # accepted sight
 
         return (-1, 0) # not see
+    
+    def movement_strategy(self, board):
+        x_seeker, y_seeker = self.look_around(board) # look around before moving
+        x_moved, y_moved = self.position
+        
+        while (x_moved, y_moved) == self.position:
+            if x_seeker == -1: # not fought seeker
+                # move randomly
+                random_direction = random.randint(1, 8)
+            
+                if random_direction == 1: direction = "up"
+                elif random_direction == 2: direction = "down"
+                elif random_direction == 3: direction = "left"
+                elif random_direction == 4: direction = "right"
+                elif random_direction == 5: direction = "up_left"
+                elif random_direction == 6: direction = "up_right"
+                elif random_direction == 7: direction = "down_left"
+                elif random_direction == 8: direction = "down_right"
+            
+                x_moved, y_moved = self.move(direction, board)
+            else: # seeker fought

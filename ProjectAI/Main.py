@@ -3,7 +3,7 @@ from Board import *
 
 def main():
     pygame.init()
-    game_map = Board('random_map_200x200.txt')  
+    game_map = Board(r'C:\Users\paody\Documents\GitHub\ProjectAI\ProjectAI\map1_1.txt')
 
     # Calculate the size of the game window based on the size of the game board and the cell size
     screen_width = game_map.m * (game_map.CELL_SIZE + MARGIN) + MARGIN * 2
@@ -18,7 +18,6 @@ def main():
 
     done = False
     clock = pygame.time.Clock()
-
     while not done:
         moved_this_loop = False
         

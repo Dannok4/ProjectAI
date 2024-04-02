@@ -15,6 +15,7 @@ class Board:
     def __init__(self, file_name):
         self.map_with_objects, self.n, self.m, self.obstacles, self.CELL_SIZE = self.create_map(file_name)
         self.seeker_pos = None
+        self.steps = 0
 
     # Đọc file và tạo map bằng ký tự
     def create_map(self, file_name):

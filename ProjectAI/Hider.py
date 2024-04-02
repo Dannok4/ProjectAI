@@ -2,45 +2,37 @@
 from Board import Board
 
 class Hider:
-    def __init__(self, name, x, y):
-        self.name = name
+    def __init__(self, x, y):
         self.position = (x, y)  # Starting position
-        self.steps = 0
         self.announce_position = (-1, 0)
         
-    def check_valid_move(self, m, n, Board, direction):
-        x, y = self.position
-        
+    def check_valid_move(self, board, x, y, direction):       
         # check valid movement for hider
-        if 0 <= x < m and 0 <= y < n:
-            if Board[y][x] == 0:
+        if 0 <= x < board.m and 0 <= y < board.n:
+            if board.map_with_objects[y][x] == 0:
                 if direction == "left" or direction == "right" or direction == "up" or direction == "down":
                     return True
                 else:
                     if direction == "up_left":
-                        if Board[y-1][x] != 0 or Board[y][x-1] != 0: return True
-                        else: return False
+                        if (board.map_with_objects[y+1][x] == 1 or board.map_with_objects[y+1][x] == 4) and (board.map_with_objects[y][x+1] == 1 or board.map_with_objects[y][x+1] == 4): return False
+                        else: return True
                         
                     if direction == "up_right":
-                        if Board[y][x+1] != 0 or Board[y-1][x] != 0: return True
-                        else: return False
+                        if (board.map_with_objects[y+1][x] == 1 or board.map_with_objects[y+1][x] == 4) and (board.map_with_objects[y][x-1] == 1 or board.map_with_objects[y][x-1] == 4): return False
+                        else: return True
                         
                     if direction == "down_left":
-                        if Board[y][x-1] != 0 or Board[y+1][x] != 0: return True
-                        else: return False
+                        if (board.map_with_objects[y-1][x] == 1 or board.map_with_objects[y-1][x] == 4) and (board.map_with_objects[y][x+1] == 1 or board.map_with_objects[y][x+1] == 4): return False
+                        else: return True
                         
-                    if direction == "up_left":
-                        if Board[y+1][x] != 0 or Board[y][x+1] != 0: return True
-                        else: return False 
+                    if direction == "down_right":
+                        if (board.map_with_objects[y-1][x] == 1 or board.map_with_objects[y-1][x] == 4) and (board.map_with_objects[y][x-1] == 1 or board.map_with_objects[y][x-1] == 4): return False
+                        else: return True 
                         
             else: return False
         else: return False
 
-    def move(self, direction, m, n, board):
-        # Check if movement is valid
-        if self.check_valid_move(board, direction):
-            return 0
-        
+    def move(self, direction, board): # return next position or current position if move is invalid
         # Move function for hider          
         x, y = self.position
                     
@@ -64,40 +56,41 @@ class Hider:
         if direction == "down_right":
             x += 1
             y += 1
+            
+        # Check if movement is valid
+        if self.check_valid_move(board, x, y, direction):
+            self.position = (x, y) # if valid, save position
+            
+        return self.position
 
-        self.position = (x, y)
-        self.steps += 1
-        
-        if self.steps % 5 == 0:  # make a signal each 5 steps
-            self.announce(m, n, board)
-
-    def announce(self, m, n, map): # Make an announcement
+    def announce(self, board): # Make an announcement
         pre_announce_x, pre_announce_y = self.announce_position
         
         if pre_announce_x != -1: # already announce previously
-            [pre_announce_y][pre_announce_x] = 0 # delete previous announcement
+            board.map_with_objects[pre_announce_y][pre_announce_x] = 0 # delete previous announcement
         
         rand_announce = random.randint(1, 49) # random position
         
         x_hider, y_hider = self.position
         
         dem = 1;
-        for i in range(max(y_hider - 3, 0), min(y_hider + 3, n - 1)):
-            for j in range(max(x_hider - 3, 0), min(x_hider + 3, m - 1)):
+        for i in range(max(y_hider - 3, 0), min(y_hider + 3, board.n - 1)):
+            for j in range(max(x_hider - 3, 0), min(x_hider + 3, board.m - 1)):
                 if dem == rand_announce: # correct position to announce
-                    map[i][j] = 5 # signal for an announcement
+                    board.map_with_objects[i][j] = 5 # signal for an announcement
                     return
                 else: dem += 1 # not correct, find another
            
-    def look_around(self, m, n, board): # return position of seeker
+    def look_around(self, board): # return position of seeker
         x_hider, y_hider = self.position
         x_seeker, y_seeker = -1, 0
         
-        for i in range(max(y_hider - 2, 0), min(y_hider + 2, n - 1)):
-            for j in range(max(x_hider - 2, 0), min(x_hider + 2, m - 1)):
-                if board[i][j] == 3:
+        for i in range(max(y_hider - 2, 0), min(y_hider + 2, board.n - 1)):
+            for j in range(max(x_hider - 2, 0), min(x_hider + 2, board.m - 1)):
+                if board.map_with_objects[i][j] == 3:
                     x_seeker = j
                     y_seeker = i
+                    j = board.m, i = board.n # end loop when fought
                     
         if x_seeker != -1: # saw seeker
             x_vector, y_vector = x_seeker - x_hider, y_seeker - y_hider # cal vector to have direction

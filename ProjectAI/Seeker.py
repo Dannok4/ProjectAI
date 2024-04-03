@@ -1,13 +1,198 @@
 ﻿import sys
 import pygame
 import heapq
+import math
 class Seeker:
-    def __init__(self, position, vision_radius, bound, map, score=0):
+    def __init__(self, position, vision_radius, bound, map):
         self.position = position
         self.vision_radius = vision_radius
-        self.score = score
+       # self.score = score
         self.bound = bound
         self.map = map
+        #self.seeker_pos = self.find_seeker_pos()
+   def is_valid_position(self, row, col):
+        return 0 <= row < self.bound[0] and 0 <= col < self.bound[1] and self.game_map[row][col] == 0
+   def processVision(self, vision, seekerRow, seekerColumn):
+        width = len(vision)
+        length = len(vision[0])
+
+        # Xử lý từng ô riêng lẻ
+        for row in range(width):    
+            for col in range(length):
+                if vision[row][col] == 1:
+                    # Ô đang xét lệch theo chiều dọc nhiều so với Seeker
+                    if abs(row - seekerRow) > abs(col - seekerColumn): 
+                        i = row
+                        if row < seekerRow: # Ô ở phía trên Seeker
+                            while i >= 0:
+                                vision[i][col] = 1
+                                i -= 1    
+                        
+                            # Nếu ô ở ngay trên Seeker
+                            if row > 0  and row == seekerRow - 1 and col == seekerColumn:
+                                if col > 0: vision[row-1][col-1] = 1
+                                if col < length - 1: vision[row-1][col+1] = 1
+
+                        elif row > seekerRow:   # Ô ở dưới Seeker
+                            while i < width:
+                                vision[i][col] = 1
+                                i += 1
+
+                            # Nếu ô ở ngay dưới Seeker
+                            if row < width - 1 and row == seekerRow + 1 and col == seekerColumn:
+                                if col > 0: vision[row+1][col-1] = 1
+                                if col < length - 1: vision[row+1][col+1] = 1
+
+
+                    # Ô đang xét lệch theo chiều ngang nhiều so với Seeker
+                    elif abs(row - seekerRow) < abs(col - seekerColumn):
+                        j = col
+                        if col < seekerColumn:  # Ô bên trái Seeker
+                            while j >= 0:
+                                vision[row][j] = 1
+                                j -= 1
+
+                            # Nếu ô ngay trái Seeker
+                            if col > 0 and col == seekerColumn - 1 and row == seekerRow:
+                                if row > 0: vision[row-1][col-1] = 1
+                                if row < width - 1: vision[row+1][col-1] = 1
+
+                        elif col > seekerColumn:  # Ô bên phải Seeker
+                            while j < length:
+                                vision[row][j] = 1
+                                j += 1
+
+                            # Nếu ô ngay phải Seeker
+                            if col < length - 1 and col == seekerColumn + 1 and row == seekerRow:
+                                if row > 0: vision[row-1][col+1] = 1
+                                if row < width - 1: vision[row+1][col+1] = 1
+                        
+
+                    # Ô đang xét nằm trên đường chéo với Seeker
+                    else:
+                        i, j = row, col
+                        if row < seekerRow and col < seekerColumn:  # Đường chéo góc trên-trái
+                            while(i >= 0 and j >= 0):
+                                vision[i][j] = 1
+
+                                if i != row and i > 0: vision[i-1][j] = 1
+                                if j != col and j > 0: vision[i][j-1] = 1
+
+                                i -= 1
+                                j -= 1
+
+                        elif row < seekerRow and col > seekerColumn:  # Đường chéo góc trên-phải
+                            while(i >= 0 and j < length):
+                                vision[i][j] = 1
+
+                                if i != row and i > 0: vision[i-1][j] = 1
+                                if j != col and j < length - 1: vision[i][j+1] = 1
+
+                                i -= 1
+                                j += 1
+
+                        elif row > seekerRow and col > seekerColumn:   # Đường chéo góc dưới-phải
+                            while(i < width and j < length):
+                                vision[i][j] = 1
+
+                                if i != row and i < width - 1: vision[i+1][j] = 1
+                                if j != col and j < length - 1: vision[i][j+1] = 1
+
+                                i += 1
+                                j += 1
+
+                        elif row > seekerRow and col < seekerColumn:    # Đường chéo góc dưới-trái
+                            while(i < width and j >= 0):
+                                vision[i][j] = 1
+
+                                if i != row and i < width - 1: vision[i+1][j] = 1
+                                if j != col and j > 0: vision[i][j-1] = 1
+
+                                i += 1
+                                j -= 1
+
+
+        # Xử lý các ô bị che bởi 2 ô kề nhau
+        for i in range(width//2):
+            for row in range(width):
+                for col in range(length):
+                    if vision[row][col] == 1:
+                        if row > 0 and row < seekerRow: # 2 ô đang xét nằm trên Seeker
+                            if col <= seekerColumn and col < length-1:  # 2 ô nằm bên trái so với Seeker
+                                if vision[row][col+1] == 1: # 2 ô đang xét nằm ngang
+                                    vision[row-1][col] = 1
+
+                                if col > 0 and vision[row-1][col] == 1: # 2 ô đang xét nằm dọc
+                                    vision[row-1][col-1] = 1
+
+                                if col > 0 and vision[row+1][col] == 1:
+                                    vision[row][col-1] = 1
+
+                            if col >= seekerColumn and col < length-1: # 2 ô nằm bên phải Seeker
+                                if vision[row][col+1] == 1: # 2 ô nằm ngang
+                                    vision[row-1][col+1] = 1
+
+                                if vision[row-1][col] == 1: # 2 ô nằm dọc
+                                    vision[row-1][col+1] = 1
+
+                                if vision[row+1][col] == 1:
+                                    vision[row][col+1] = 1
+                                
+                        
+                        elif row > seekerRow and row < width - 1:   # 2 ô đang xét nằm dưới Seeker
+                            if col <= seekerColumn and col < length-1:
+                                if vision[row][col+1] == 1:
+                                    vision[row+1][col] = 1
+
+                                if col > 0 and vision[row+1][col] == 1:
+                                    vision[row+1][col-1] = 1
+
+                                if col > 0 and vision[row-1][col] == 1:
+                                    vision[row][col-1] = 1
+
+                            elif col >= seekerColumn and col < length-1:
+                                if vision[row][col+1] == 1:
+                                    vision[row+1][col+1] = 1
+
+                                if vision[row+1][col] == 1:
+                                    vision[row+1][col+1] = 1
+
+                                if vision[row-1][col] == 1:
+                                    vision[row][col+1] = 1
+                    
+        return vision
+
+    def setVision(self):
+        startX = max(0, self.position[0] - self.vision_radius)
+        startY = max(0, self.position[1] - self.vision_radius)
+        endX = min(self.bound[0] - 1, self.position[0] + self.vision_radius)
+        endY = min(self.bound[1] - 1, self.position[1] + self.vision_radius)
+        print(f"X({startX}->{endX}); Y({startY}->{endY})")
+
+        if startX < 0: 
+            startX = 0
+        if endX >= self.bound[0]: 
+            endX = self.bound[0] - 1
+        if startY < 0: 
+            startY = 0
+        if endY >= self.bound[1]: 
+            endY = self.bound[1] - 1
+
+        self.vision = []  
+        for i in range(startX, endX + 1):
+            row = []
+            for j in range(startY, endY + 1):
+                row.append(self.game_map[i][j])
+            self.vision.append(row)
+
+        seekerInVisionX = self.position[0] - startX
+        seekerInVisionY = self.position[1] - startY
+
+        if 0 <= seekerInVisionX < len(self.vision) and 0 <= seekerInVisionY < len(self.vision[0]):
+            self.vision[seekerInVisionX][seekerInVisionY] = 8
+
+        self.vision = self.processVision(self.vision, seekerInVisionX, seekerInVisionY)
+        return self.vision
 
         self.direction = [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1 , 1), (-1, -1)] # go right, left, down, up, down_right, down_left, up_right, up_left 
 
@@ -29,7 +214,7 @@ class Seeker:
         self.invalid_vision_down_right = []
 
         self.valid_movement = []
-
+    
     def check_diagonal_up_left(self, row, col):
         for i in range(1, self.vision_radius + 1):
             if ( row == self.position[0] - i and col == self.position[1] - i):
@@ -234,99 +419,52 @@ class Seeker:
     def seeker_go_up_left(self):
         self.position = tuple(map(sum, zip(self.position, self.direction[7])))
         
-# def manhattan_distance(a, b):
-#     return abs(a[0] - b[0]) + abs(a[1] - b[1])
-#     return sqrt
+def manhattan_distance(a, b):
+    return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
-# def neighbors(node):
-#     x, y = node
-#     return [(x+1, y), (x-1, y), (x, y+1), (x, y-1)]  # Assuming 4-connected neighbors
+def neighbors(node):
+    x, y = node
+    return [
+        (x+1, y), (x-1, y), (x, y+1), (x, y-1),  # Four primary directions
+        (x+1, y+1), (x+1, y-1), (x-1, y+1), (x-1, y-1)  # Diagonal directions
+    ]
 
-# def a_star_search(start, goal, heuristic, neighbors_fn):
-#     open_set = []
-#     closed_set = set()
-#     heapq.heappush(open_set, (0 + heuristic(start, goal), 0, start, []))
+def a_star_search(start, goal, heuristic, neighbors_fn):
+    open_set = []
+    closed_set = set()
+    heapq.heappush(open_set, (0 + heuristic(start, goal), 0, start, []))
 
-#     while open_set:
-#         _, g, current, path = heapq.heappop(open_set)
+    while open_set:
+        _, g, current, path = heapq.heappop(open_set)
 
-#         if current == goal:
-#             return path + [current]
-#         if current in closed_set:
-#             continue
-#         closed_set.add(current)
-#         for neighbor in neighbors_fn(current):
-#             if neighbor in closed_set:
-#                 continue
-#             new_g = g + 1
-#             heapq.heappush(open_set, (new_g + heuristic(neighbor, goal), new_g, neighbor, path + [current]))
-
-#     return None
-def count_inversions(state):
-    inv_count = 0
-    flattened_board = [val for sublist in state for val in sublist]
-    for i in range(len(flattened_board)):
-        for j in range(i + 1, len(flattened_board)):
-            if flattened_board[i] > flattened_board[j] and flattened_board[i] != 0 and flattened_board[j] != 0:
-                inv_count += 1
-    return inv_count
-
-def inversion_distance(state):
-    n = len(state)
-    inv_count = count_inversions(state)
-    vertical = inv_count // 3 + inv_count % 3
-
-    horizontal = 0
-    for i in range(n):
-        for j in range(n):
-            if state[i][j] == 0:
+        if current == goal:
+            return path + [current]
+        
+        if current in closed_set:
+            continue
+        
+        closed_set.add(current)
+        
+        for neighbor in neighbors_fn(current):
+            if neighbor in closed_set:
                 continue
-            for k in range(j + 1, n):
-                if state[i][k] == 0:
-                    continue
-                if (state[i][j] - 1) // n == (state[i][k] - 1) // n:
-                    if state[i][j] > state[i][k]:
-                        horizontal += 1
+            
+            new_g = g + 1
+            heapq.heappush(open_set, (new_g + heuristic(neighbor, goal), new_g, neighbor, path + [current]))
 
-    return vertical + horizontal
+    return None
 
-def a_star_inversion_distance(initial_state, goal_state):
-    frontier = PriorityQueue()
-    initial_state_cost = inversion_distance(initial_state.board)
-    initial_state.cost = initial_state_cost
-    frontier.put((initial_state_cost, initial_state))
-    explored = {}
 
-    max_memory_usage = 0
-    while not frontier.empty():
-        memory_usage = get_memory_usage()
-        max_memory_usage = max(max_memory_usage, memory_usage)
-        current_f_score, current_state = frontier.get()
-
-        if current_state.board == goal_state:
-            return get_solution(current_state), max_memory_usage
-
-        explored[tuple(map(tuple, current_state.board))] = current_state.cost
-
-        for successor in current_state.successors():
-            if tuple(map(tuple, successor.board)) not in explored or explored[tuple(map(tuple, successor.board))] > successor.cost:
-                g_score = current_state.cost + 1
-                h_score = inversion_distance(successor.board)
-                f_score = g_score + h_score
-                successor.cost = g_score
-                frontier.put((f_score, successor))
-                explored[tuple(map(tuple, successor.board))] = successor.cost
-
-    return None, max_memory_usage
 
 # Example usage:
 start = (0, 0)
 goal = (5, 5)
-map = [[0, 0, 0, 0, 0, 0],
+map = [[0, 1, 1, 0, 0, 0],
        [0, 1, 1, 1, 1, 0],
-       [0, 1, 0, 0, 1, 0],
-       [0, 1, 0, 1, 1, 0],
-       [0, 0, 0, 0, 0, 0]]
+       [0, 1, 1, 0, 1, 0],
+       [0, 1, 1, 0, 1, 0],
+       [0, 1, 1, 0, 0, 0],
+       [0, 1, 1, 0, 0, 0]]
 
 seeker = Seeker(start, 1, (len(map), len(map[0])), map)
 path = a_star_search(start, goal, manhattan_distance, neighbors)
@@ -335,88 +473,44 @@ if path:
     print("Path found:", path)
 else:
     print("No path found.")
-class Seeker:
-    def __init__(self, board):
-        self.board = board
-        self.seeker_pos = self.find_seeker_pos()
 
-    # Tìm vị trí seeker trong map
-    def find_seeker_pos(self):
-        for row in range(self.board.n):
-            for col in range(self.board.m):
-                if self.board.map_with_objects[row][col] == 'S':
-                    return (row, col)
-        return None
+# def test_setVision():
+#     game_map = [[0, 0, 0, 0, 0, 0],
+#                 [0, 1, 1, 1, 1, 0],
+#                 [0, 1, 0, 0, 1, 0],
+#                 [0, 1, 0, 1, 1, 0],
+#                 [0, 0, 0, 0, 0, 0]]
+    
+#     position = (0, 0)
+#     vision_radius = 3
+#     bound = (len(game_map), len(game_map[0]))
+    
+#     # Tạo một đối tượng Seeker với đủ các đối số
+#     seeker = Seeker(position, vision_radius, bound, game_map)
+    
+#     # Thực hiện test cho hàm setVision
+#     vision = seeker.setVision()
+#     print(vision)
 
-    # Di chuyển Seeker bằng phím
-    def move(self, direction):
-        row, col = self.seeker_pos
-        target_row = row
-        target_col = col
-        if direction == 'up':
-            target_row -= 1
-        elif direction == 'down':
-            target_row += 1
-        elif direction == 'left':
-            target_col -= 1
-        elif direction == 'right':
-            target_col += 1
-        
-        if 0 < target_row < len(self.board.map_with_objects) - 1 and 0 < target_col < len(self.board.map_with_objects[0]) - 1:
-            if self.board.map_with_objects[target_row][target_col] not in ['#', 'X']:
-                self.board.map_with_objects[row][col] = ' '
-                self.board.map_with_objects[target_row][target_col] = 'S'
-                self.seeker_pos = (target_row, target_col)
-            elif self.board.map_with_objects[target_row][target_col] == 'X':   
-                self.move_obstacle(direction, target_row, target_col)
+# # Gọi hàm test_setVision để kiểm tra
+# test_setVision()
+# def test_setVision():
+#     game_map = [[0, 0, 0, 0, 0, 0],
+#                 [0, 1, 1, 1, 1, 0],
+#                 [0, 1, 0, 0, 1, 0],
+#                 [0, 1, 0, 1, 1, 0],
+#                 [0, 0, 0, 0, 0, 0]]
+    
+#     position = (0, 0)
+#     vision_radius = 3
+#     bound = (len(game_map), len(game_map[0]))
+    
+#     # Tạo một đối tượng Seeker với đủ các đối số
+#     seeker = Seeker(position, vision_radius, bound, game_map)
+    
+#     # Thực hiện test cho hàm setVision
+#     vision = seeker.setVision()
+#     print(vision)
 
-    # Di chuyển khối vật cản  
-    def move_obstacle(self, direction, target_row, target_col):
-        obstacle_site = None
-        for i, obstacle in enumerate(self.board.obstacles):
-            if len(obstacle) == 4:
-                top, left, bottom, right = obstacle
-                if (target_col == left + 1 or target_col == right + 1) and (target_row >= top + 1 and target_row <= bottom + 1):
-                    obstacle_site = i
-                    break
-                if (target_row == top + 1 or target_row == bottom + 1) and (target_col >= left + 1 and target_col <= right + 1):
-                    obstacle_site = i
-                    break
-        
-        if obstacle_site is not None:
-            top, left, bottom, right = self.board.obstacles[obstacle_site]
-            top += 1
-            left += 1
-            right += 1
-            bottom += 1
-
-        if direction == 'up':
-            for i in range(left, right + 1):
-                if(top < 1 or self.board.map_with_objects[top - 1][i] in ['#', 'X']):
-                    return 
-            self.board.map_with_objects[top - 1][left:right + 1] = ['X'] * (right - left + 1)
-            self.board.map_with_objects[bottom][left:right + 1] = [' '] * (right - left + 1)
-            self.board.obstacles[obstacle_site] = (top - 2, left - 1, bottom - 2, right - 1)
-        elif direction == 'down':
-            for i in range(left, right + 1):
-                if(bottom > self.board.n - 3 or self.board.map_with_objects[bottom + 1][i] in ['#', 'X']):
-                    return
-            self.board.map_with_objects[bottom + 1][left:right + 1] = ['X'] * (right - left + 1)
-            self.board.map_with_objects[top][left:right + 1] = [' '] * (right - left + 1)
-            self.board.obstacles[obstacle_site] = (top, left - 1, bottom, right - 1)
-        elif direction == 'left':
-            for i in range(top, bottom + 1):
-                if(left < 1 or self.board.map_with_objects[i][left - 1] in ['#', 'X']):
-                    return
-            for i in range(top, bottom + 1):
-                self.board.map_with_objects[i][left - 1] = 'X'
-                self.board.map_with_objects[i][right] = ' '
-            self.board.obstacles[obstacle_site] = (top - 1, left - 2, bottom - 1, right - 2)
-        elif direction == 'right':
-            for i in range(top, bottom + 1):
-                if(right > self.board.m - 3 or self.board.map_with_objects[i][right + 1] in ['#', 'X']):
-                    return 
-            for i in range(top, bottom + 1):
-                    self.board.map_with_objects[i][right + 1] = 'X'
-                    self.board.map_with_objects[i][left] = ' '          
-            self.board.obstacles[obstacle_site] = (top - 1, left, bottom - 1, right)
+# # Gọi hàm test_setVision để kiểm tra
+# test_setVision()

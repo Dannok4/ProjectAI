@@ -360,7 +360,7 @@ class Seeker:
             else: return False
         else: return False
     def move(self, direction, board): # return next position or current position if move is invalid
-        # Move function for hider          
+        # Move function for Seeker         
         x, y = self.position
         if direction == "left":
             x -= 1
@@ -387,26 +387,41 @@ class Seeker:
             self.position = (x, y) # if valid, save position
         return self.position
 
-    def successors(node, center, map):
-    x, y = node
-    cx, cy = center
-    successors_list = []
+    def successors(node, board_instance, map):
+        x, y = node
+        cx, cy = board_instance.n, board_instance.m  # Lấy giá trị cx, cy từ thể hiện của lớp Board
+        successors_list = []
 
-    # Di chuyển đến trung tâm
-    if x != cx: 
-        x_direction = (cx - x) // abs(cx - x)
-        successors_list.append((x + x_direction, y))
-    if y != cy:
-        y_direction = (cy - y) // abs(cy - y)
-        successors_list.append((x, y + y_direction))
-    
-    # Di chuyển theo 8 hướng
-    for dx in [-1, 0, 1]:
-        for dy in [-1, 0, 1]:
-            if dx == 0 and dy == 0:
-                continue
-            new_x, new_y = x + dx, y + dy
-            if 0 <= new_x < len(map) and 0 <= new_y < len(map[0]) and map[new_x][new_y] != '#':
-                successors_list.append((new_x, new_y))
+        # Di chuyển đến trung tâm
+        if x != cx: 
+            x_direction = (cx - x) // abs(cx - x)
+            successors_list.append((x + x_direction, y))
+        if y != cy:
+            y_direction = (cy - y) // abs(cy - y)
+            successors_list.append((x, y + y_direction))
 
-    return successors_list
+        # Di chuyển theo 8 hướng
+        for dx in [-1, 0, 1]:
+            for dy in [-1, 0, 1]:
+                if dx == 0 and dy == 0:
+                    continue
+                new_x, new_y = x + dx, y + dy
+                if 0 <= new_x < len(map) and 0 <= new_y < len(map[0]) and map[new_x][new_y] != '#':
+                    successors_list.append((new_x, new_y))
+
+        return successors_list
+    def Seeker_move(self, board_instance, hider_position):
+        # Kiểm tra xem Hider có trong tầm nhìn của Seeker hay không
+        if self.seeker_can_see_hider():
+            # Nếu Hider nằm trong tầm nhìn của Seeker:
+            path = self.a_star_search_with_path_update(self.position, hider_position, self.manhattan_distance, self.neighbors)
+            if path:
+                next_position = path[1]  # Vị trí tiếp theo trong đường đi đến hider
+                self.position = next_position
+        else:
+            # Nếu Hider không có trong tầm nhìn, di chuyển theo các hướng có thể
+            successors_list = self.successors(self.position, board_instance, board_instance.map_with_objects)
+            if successors_list:
+                next_position = successors_list[0] # Chọn bước di chuyển đầu tiên
+                self.position = next_position
+        return self.position

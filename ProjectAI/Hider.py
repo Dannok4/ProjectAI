@@ -1,5 +1,4 @@
-﻿import math
-import random
+﻿import random
 from Board import Board
 
 class Hider:

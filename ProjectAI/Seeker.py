@@ -3,22 +3,18 @@ import pygame
 import heapq
 import math
 class Seeker:
-    def __init__(self, position, vision_radius, bound, map):
-        self.position = position
-        self.vision_radius = vision_radius
-       # self.score = score
-        self.bound = bound
-        self.board = board
+    def __init__(self, x, y):
+        self.position = (x, y) # Starting position
+        # self.score = score
         self.seeker_pos = self.find_seeker_pos()
 
-    # # Tìm vị trí seeker trong map
-    # def find_seeker_pos(self):
-    #     for row in range(self.board.n):
-    #         for col in range(self.board.m):
-    #             if self.board.map_with_objects[row][col] == 'S':
-    #                 return (row, col)
-    #     return None
-
+    # Tìm vị trí seeker trong map
+    def find_seeker_pos(self):
+        for row in range(self.board.n):
+            for col in range(self.board.m):
+                if self.board.map_with_objects[row][col] == '3':
+                    return (row, col)
+        return None    
     def setVision(self):
         startX = max(0, self.position[0] - self.vision_radius)
         startY = max(0, self.position[1] - self.vision_radius)
@@ -31,7 +27,7 @@ class Seeker:
         if endX >= self.bound[0]: 
             endX = self.bound[0] - 1
         if startY < 0: 
-            startY = 0
+            startY = 0 
         if endY >= self.bound[1]: 
             endY = self.bound[1] - 1
 
@@ -246,7 +242,6 @@ class Seeker:
         self.check_vision_right()
         self.check_vision_up()
         self.check_vision_down()
-
         self.check_vision_up_left()
         self.check_vision_up_right()
         self.check_vision_down_left()
@@ -275,7 +270,41 @@ class Seeker:
 
     def seeker_go_up_left(self):
         self.position = tuple(map(sum, zip(self.position, self.direction[7])))
-        
+
+     #def seeker_can_see_hider(self, hider_position):
+    # Kiểm tra xem vị trí của hider có nằm trong tầm nhìn của seeker hay không
+    def seeker_can_see_hider(self):
+        hider_position = None
+
+        # Tìm vị trí của hider trong tầm nhìn của seeker
+        for i in range(len(self.vision)):
+            for j in range(len(self.vision[0])):
+                if self.vision[i][j] == 2:
+                    hider_position = (i, j)
+                    break
+        # Nếu không tìm thấy vị trí của hider, không thể nhìn thấy
+        if hider_position is None:
+            return False
+        # Kiểm tra xem vị trí của hider có nằm trong tầm nhìn của seeker hay không
+        row, col = hider_position
+        # Kiểm tra tầm nhìn theo các hướng
+        if (row, col) in self.valid_vision_left:
+            return True
+        if (row, col) in self.valid_vision_right:
+            return True
+        if (row, col) in self.valid_vision_up:
+            return True
+        if (row, col) in self.valid_vision_down:
+            return True
+        if (row, col) in self.valid_vision_up_left:
+            return True
+        if (row, col) in self.valid_vision_up_right:
+            return True
+        if (row, col) in self.valid_vision_down_left:
+            return True
+        if (row, col) in self.valid_vision_down_right:
+            return True
+        return False
     def manhattan_distance(a, b):
         return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
@@ -286,22 +315,24 @@ class Seeker:
             (x+1, y+1), (x+1, y-1), (x-1, y+1), (x-1, y-1)  # Diagonal directions
         ]
 
-    def a_star_search(start, goal, heuristic, neighbors_fn):
+    def a_star_search_with_path_update(start, goal, heuristic, neighbors_fn):
         open_set = []
-        closed_set = set()
         heapq.heappush(open_set, (0 + heuristic(start, goal), 0, start, []))
+    
         while open_set:
             _, g, current, path = heapq.heappop(open_set)
+        
             if current == goal:
-                return path + [current]  
-            if current in closed_set:
-                continue  
-            closed_set.add(current)  
-            for neighbor in neighbors_fn(current):
-                if neighbor in closed_set:
-                    continue  
+                return path + [current]
+        
+            successors = neighbors_fn(current)
+            for neighbor in successors:
                 new_g = g + 1
-                heapq.heappush(open_set, (new_g + heuristic(neighbor, goal), new_g, neighbor, path + [current]))
+                new_path = path + [current]
+            
+                # Thực hiện tìm kiếm lại nếu có successors mới
+                if neighbor not in new_path:
+                    heapq.heappush(open_set, (new_g + heuristic(neighbor, goal), new_g, neighbor, new_path))
 
         return None
     def check_valid_move(self, board, x, y, direction):       
@@ -325,15 +356,12 @@ class Seeker:
                         
                     if direction == "down_right":
                         if (board.map_with_objects[y-1][x] == 1 or board.map_with_objects[y-1][x] == 4) and (board.map_with_objects[y][x-1] == 1 or board.map_with_objects[y][x-1] == 4): return False
-                        else: return True 
-                        
+                        else: return True      
             else: return False
         else: return False
-
     def move(self, direction, board): # return next position or current position if move is invalid
         # Move function for hider          
         x, y = self.position
-                    
         if direction == "left":
             x -= 1
         if direction == "right":
@@ -357,5 +385,28 @@ class Seeker:
         # Check if movement is valid
         if self.check_valid_move(board, x, y, direction):
             self.position = (x, y) # if valid, save position
-            
         return self.position
+
+    def successors(node, center, map):
+    x, y = node
+    cx, cy = center
+    successors_list = []
+
+    # Di chuyển đến trung tâm
+    if x != cx: 
+        x_direction = (cx - x) // abs(cx - x)
+        successors_list.append((x + x_direction, y))
+    if y != cy:
+        y_direction = (cy - y) // abs(cy - y)
+        successors_list.append((x, y + y_direction))
+    
+    # Di chuyển theo 8 hướng
+    for dx in [-1, 0, 1]:
+        for dy in [-1, 0, 1]:
+            if dx == 0 and dy == 0:
+                continue
+            new_x, new_y = x + dx, y + dy
+            if 0 <= new_x < len(map) and 0 <= new_y < len(map[0]) and map[new_x][new_y] != '#':
+                successors_list.append((new_x, new_y))
+
+    return successors_list

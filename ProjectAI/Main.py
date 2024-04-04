@@ -1,4 +1,4 @@
-﻿from Game import *
+﻿from Board import *
 
 def main():
     pygame.init()
@@ -37,13 +37,11 @@ def main():
                     elif event.key == pygame.K_s:
                         seeker.move('down')
                         moved_this_loop = True                    
-
         # Draw the game map
         game_map.draw_map(screen, game_map.CELL_SIZE)
 
         pygame.display.flip()
         clock.tick(60)
-    
     pygame.quit()
 
 if __name__ == "__main__":

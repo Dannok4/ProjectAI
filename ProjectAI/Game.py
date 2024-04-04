@@ -1,3 +1,4 @@
-import Seeker.py
-import Hider.py
-import Board.py
+from Board import *
+from Hider import *
+from Seeker import *
+import pygame

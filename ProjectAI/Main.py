@@ -1,5 +1,4 @@
-﻿import pygame
-from Board import *
+﻿from Game import *
 
 def main():
     pygame.init()

@@ -21,7 +21,7 @@ class Board:
     def create_map(self, file_name):
         with open(file_name, 'r') as file:
             n, m = map(int, file.readline().split())
-            map_matrix = [[' ' for _ in range(m)] for _ in range(n)]
+            map_matrix = [[0 for _ in range(m)] for _ in range(n)]
             #Xác định kích thước mỗi ô vuông trong bảng
             if max(m, n) <= 50:
                 CELL_SIZE = 15
@@ -36,11 +36,11 @@ class Board:
                 row = list(map(int, file.readline().split()))
                 for j in range(m):
                     if row[j] == 2:
-                        map_matrix[i][j] = 'H' # Hider
+                        map_matrix[i][j] = 2 # Hider
                     elif row[j] == 3:
-                        map_matrix[i][j] = 'S' # Seeker
+                        map_matrix[i][j] = 3 # Seeker
                     elif row[j] == 1:
-                        map_matrix[i][j] = '#' # Wall
+                        map_matrix[i][j] = 1 # Wall
         
             obstacles = []
             for _ in range(4):
@@ -50,14 +50,14 @@ class Board:
 
             m += 2
             n += 2
-            map_with_objects = [[' ' for _ in range(m)] for _ in range(n)]
+            map_with_objects = [[0 for _ in range(m)] for _ in range(n)]
             
             for i in range(n):
-                map_with_objects[i][0] = '#'
-                map_with_objects[i][m - 1] = '#'
+                map_with_objects[i][0] = 1
+                map_with_objects[i][m - 1] = 1
             for j in range(m):
-                map_with_objects[0][j] = '#'
-                map_with_objects[n - 1][j] = '#'
+                map_with_objects[0][j] = 1
+                map_with_objects[n - 1][j] = 1
 
             for i in range(0, n - 2):
                 for j in range(0, m - 2):
@@ -68,7 +68,7 @@ class Board:
                     top, left, bottom, right = obstacle
                     for i in range(top, bottom + 1):
                         for j in range(left, right + 1):
-                            map_with_objects[i + 1][j + 1] = 'X' # Obstacle
+                            map_with_objects[i + 1][j + 1] = 4 # Obstacle
                 else:
                     print("Invalid obstacle format:", obstacle)
             
@@ -85,13 +85,13 @@ class Board:
         for row in range(self.n):
             for col in range(self.m):
                 color = WHITE
-                if self.map_with_objects[row][col] == '#':
+                if self.map_with_objects[row][col] == 1:
                     color = BLACK
-                elif self.map_with_objects[row][col] == 'H':
+                elif self.map_with_objects[row][col] == 2:
                     color = GREEN
-                elif self.map_with_objects[row][col] == 'S':
+                elif self.map_with_objects[row][col] == 3:
                     color = RED
-                elif self.map_with_objects[row][col] == 'X':
+                elif self.map_with_objects[row][col] == 4:
                     color = BLUE
                 pygame.draw.rect(screen, color,
                                 [(MARGIN + CELL_SIZE) * col + MARGIN,
@@ -107,35 +107,35 @@ class Seeker:
     def find_seeker_pos(self):
         for row in range(self.board.n):
             for col in range(self.board.m):
-                if self.board.map_with_objects[row][col] == 'S':
+                if self.board.map_with_objects[row][col] == 3:
                     return (row, col)
         return None
 
-    # Di chuyển Seeker bằng phím
-    def move(self, direction):
-        row, col = self.seeker_pos
-        target_row = row
-        target_col = col
-        if direction == 'up':
-            target_row -= 1
-        elif direction == 'down':
-            target_row += 1
-        elif direction == 'left':
-            target_col -= 1
-        elif direction == 'right':
-            target_col += 1
+    # # Di chuyển Seeker bằng phím
+    # def move(self, direction):
+    #     row, col = self.seeker_pos
+    #     target_row = row
+    #     target_col = col
+    #     if direction == 'up':
+    #         target_row -= 1
+    #     elif direction == 'down':
+    #         target_row += 1
+    #     elif direction == 'left':
+    #         target_col -= 1
+    #     elif direction == 'right':
+    #         target_col += 1
         
-        if 0 < target_row < len(self.board.map_with_objects) - 1 and 0 < target_col < len(self.board.map_with_objects[0]) - 1:
-            if self.board.map_with_objects[target_row][target_col] not in ['#', 'X']:
-                self.board.map_with_objects[row][col] = ' '
-                self.board.map_with_objects[target_row][target_col] = 'S'
-                self.seeker_pos = (target_row, target_col)
-            elif self.board.map_with_objects[target_row][target_col] == 'X':   
-                success = self.move_obstacle(direction, target_row, target_col)
-                if success:
-                    self.board.map_with_objects[row][col] = ' '
-                    self.board.map_with_objects[target_row][target_col] = 'S'
-                    self.seeker_pos = (target_row, target_col)
+    #     if 0 < target_row < len(self.board.map_with_objects) - 1 and 0 < target_col < len(self.board.map_with_objects[0]) - 1:
+    #         if self.board.map_with_objects[target_row][target_col] not in [1, 4]:
+    #             self.board.map_with_objects[row][col] = 0
+    #             self.board.map_with_objects[target_row][target_col] = 3
+    #             self.seeker_pos = (target_row, target_col)
+    #         elif self.board.map_with_objects[target_row][target_col] == 4:   
+    #             success = self.move_obstacle(direction, target_row, target_col)
+    #             if success:
+    #                 self.board.map_with_objects[row][col] = 0
+    #                 self.board.map_with_objects[target_row][target_col] = 3
+    #                 self.seeker_pos = (target_row, target_col)
 
     # Di chuyển khối vật cản  
     def move_obstacle(self, direction, target_row, target_col):
@@ -159,32 +159,32 @@ class Seeker:
 
         if direction == 'up':
             for i in range(left, right + 1):
-                if(top < 1 or self.board.map_with_objects[top - 1][i] in ['#', 'X']):
+                if(top < 1 or self.board.map_with_objects[top - 1][i] in [1, 4]):
                     return False
-            self.board.map_with_objects[top - 1][left:right + 1] = ['X'] * (right - left + 1)
-            self.board.map_with_objects[bottom][left:right + 1] = [' '] * (right - left + 1)
+            self.board.map_with_objects[top - 1][left:right + 1] = [4] * (right - left + 1)
+            self.board.map_with_objects[bottom][left:right + 1] = [0] * (right - left + 1)
             self.board.obstacles[obstacle_site] = (top - 2, left - 1, bottom - 2, right - 1)
         elif direction == 'down':
             for i in range(left, right + 1):
-                if(bottom > self.board.n - 3 or self.board.map_with_objects[bottom + 1][i] in ['#', 'X']):
+                if(bottom > self.board.n - 3 or self.board.map_with_objects[bottom + 1][i] in [1, 4]):
                     return False
-            self.board.map_with_objects[bottom + 1][left:right + 1] = ['X'] * (right - left + 1)
-            self.board.map_with_objects[top][left:right + 1] = [' '] * (right - left + 1)
+            self.board.map_with_objects[bottom + 1][left:right + 1] = [4] * (right - left + 1)
+            self.board.map_with_objects[top][left:right + 1] = [0] * (right - left + 1)
             self.board.obstacles[obstacle_site] = (top, left - 1, bottom, right - 1)
         elif direction == 'left':
             for i in range(top, bottom + 1):
-                if(left < 1 or self.board.map_with_objects[i][left - 1] in ['#', 'X']):
+                if(left < 1 or self.board.map_with_objects[i][left - 1] in [1, 4]):
                     return False
             for i in range(top, bottom + 1):
-                self.board.map_with_objects[i][left - 1] = 'X'
-                self.board.map_with_objects[i][right] = ' '
+                self.board.map_with_objects[i][left - 1] = 4
+                self.board.map_with_objects[i][right] = 0
             self.board.obstacles[obstacle_site] = (top - 1, left - 2, bottom - 1, right - 2)
         elif direction == 'right':
             for i in range(top, bottom + 1):
-                if(right > self.board.m - 3 or self.board.map_with_objects[i][right + 1] in ['#', 'X']):
+                if(right > self.board.m - 3 or self.board.map_with_objects[i][right + 1] in [1, 4]):
                     return False
             for i in range(top, bottom + 1):
-                    self.board.map_with_objects[i][right + 1] = 'X'
-                    self.board.map_with_objects[i][left] = ' '          
+                    self.board.map_with_objects[i][right + 1] = 4
+                    self.board.map_with_objects[i][left] = 0          
             self.board.obstacles[obstacle_site] = (top - 1, left, bottom - 1, right)
         return True

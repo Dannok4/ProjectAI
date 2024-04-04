@@ -11,13 +11,13 @@ class Seeker:
         self.board = board
         self.seeker_pos = self.find_seeker_pos()
 
-    # Tìm vị trí seeker trong map
-    def find_seeker_pos(self):
-        for row in range(self.board.n):
-            for col in range(self.board.m):
-                if self.board.map_with_objects[row][col] == 'S':
-                    return (row, col)
-        return None
+    # # Tìm vị trí seeker trong map
+    # def find_seeker_pos(self):
+    #     for row in range(self.board.n):
+    #         for col in range(self.board.m):
+    #             if self.board.map_with_objects[row][col] == 'S':
+    #                 return (row, col)
+    #     return None
 
     def setVision(self):
         startX = max(0, self.position[0] - self.vision_radius)

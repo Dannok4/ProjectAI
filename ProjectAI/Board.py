@@ -12,13 +12,15 @@ ORANGE = (255, 165, 0)
 MARGIN = 1
 
 class Board:    
-    def __init__(self, pos_seeker, pos_hider, is_lv4, file_name):
-        self.map_with_objects, self.n, self.m, self.obstacles, self.CELL_SIZE = self.create_map(pos_seeker, pos_hider, is_lv4, file_name)
-        self.seeker_pos = None
+    def __init__(self, is_lv4, file_name):
+        self.map_with_objects, self.n, self.m, self.obstacles, self.CELL_SIZE, self.pos_seeker, self.pos_hiders = self.create_map(is_lv4, file_name)
         self.steps = 0
 
     # Đọc file và tạo map bằng ký tự
-    def create_map(self, pos_seeker, pos_hider, is_lv4, file_name):
+    def create_map(self, is_lv4, file_name):
+        pos_seeker = (-1, 0)
+        pos_hiders = []
+        
         with open(file_name, 'r') as file:
             n, m = map(int, file.readline().split())
             map_matrix = [[0 for _ in range(m)] for _ in range(n)]
@@ -37,10 +39,10 @@ class Board:
                 for j in range(m):
                     if row[j] == 2:
                         map_matrix[i][j] = 2 # Hider
-                        pos_hider.append((j, i))
+                        pos_hiders.append((j, i)) # lấy vị trí các hiders
                     elif row[j] == 3:
                         map_matrix[i][j] = 3 # Seeker
-                        pos_seeker = (j, i)
+                        pos_seeker = (j, i) # lấy vị trí seeker
                     elif row[j] == 1:
                         map_matrix[i][j] = 1 # Wall
                         
@@ -75,7 +77,8 @@ class Board:
                     else:
                         print("Invalid obstacle format:", obstacle)
             
-            return map_with_objects, n, m, obstacles, CELL_SIZE
+            return map_with_objects, n, m, obstacles, CELL_SIZE, pos_seeker, pos_hiders
+
 
     # Vẽ map bằng đồ họa
     # def draw_map(self, screen, CELL_SIZE):

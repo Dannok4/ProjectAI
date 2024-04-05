@@ -6,7 +6,7 @@ class Seeker:
     def __init__(self, x, y):
         self.position = (x, y) # Starting position
         # self.score = score
-        self.seeker_pos = self.find_seeker_pos()
+        # self.seeker_pos = self.find_seeker_pos()
         self.vision_radius = 3
         self.vision=self.setVision()
     # Tìm vị trí seeker trong map

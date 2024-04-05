@@ -12,13 +12,13 @@ BLUE = (0, 0, 255)
 MARGIN = 1
 
 class Board:    
-    def __init__(self, file_name):
-        self.map_with_objects, self.n, self.m, self.obstacles, self.CELL_SIZE = self.create_map(file_name)
+    def __init__(self, pos_seeker, pos_hider, is_lv4, file_name):
+        self.map_with_objects, self.n, self.m, self.obstacles, self.CELL_SIZE = self.create_map(pos_seeker, pos_hider, is_lv4, file_name)
         self.seeker_pos = None
         self.steps = 0
 
     # Đọc file và tạo map bằng ký tự
-    def create_map(self, file_name):
+    def create_map(self, pos_seeker, pos_hider, is_lv4, file_name):
         with open(file_name, 'r') as file:
             n, m = map(int, file.readline().split())
             map_matrix = [[0 for _ in range(m)] for _ in range(n)]
@@ -37,40 +37,43 @@ class Board:
                 for j in range(m):
                     if row[j] == 2:
                         map_matrix[i][j] = 2 # Hider
+                        pos_hider.append((j, i))
                     elif row[j] == 3:
                         map_matrix[i][j] = 3 # Seeker
+                        pos_seeker = (j, i)
                     elif row[j] == 1:
                         map_matrix[i][j] = 1 # Wall
-        
-            obstacles = []
-            for _ in range(4):
-                obstacle_line = file.readline().split()
-                if obstacle_line:
-                    obstacles.append(list(map(int, obstacle_line)))       
+                        
+            if is_lv4 == True: # if level 4, read obstacle, else, no need to
+                obstacles = []
+                for _ in range(4):
+                    obstacle_line = file.readline().split()
+                    if obstacle_line:
+                        obstacles.append(list(map(int, obstacle_line)))       
 
-            m += 2
-            n += 2
-            map_with_objects = [[0 for _ in range(m)] for _ in range(n)]
+                m += 2
+                n += 2
+                map_with_objects = [[0 for _ in range(m)] for _ in range(n)]
             
-            for i in range(n):
-                map_with_objects[i][0] = 1
-                map_with_objects[i][m - 1] = 1
-            for j in range(m):
-                map_with_objects[0][j] = 1
-                map_with_objects[n - 1][j] = 1
+                for i in range(n):
+                    map_with_objects[i][0] = 1
+                    map_with_objects[i][m - 1] = 1
+                for j in range(m):
+                    map_with_objects[0][j] = 1
+                    map_with_objects[n - 1][j] = 1
 
-            for i in range(0, n - 2):
-                for j in range(0, m - 2):
-                    map_with_objects[i + 1][j + 1] = map_matrix[i][j]
+                for i in range(0, n - 2):
+                    for j in range(0, m - 2):
+                        map_with_objects[i + 1][j + 1] = map_matrix[i][j]
 
-            for obstacle in obstacles:
-                if len(obstacle) == 4:
-                    top, left, bottom, right = obstacle
-                    for i in range(top, bottom + 1):
-                        for j in range(left, right + 1):
-                            map_with_objects[i + 1][j + 1] = 4 # Obstacle
-                else:
-                    print("Invalid obstacle format:", obstacle)
+                for obstacle in obstacles:
+                    if len(obstacle) == 4:
+                        top, left, bottom, right = obstacle
+                        for i in range(top, bottom + 1):
+                            for j in range(left, right + 1):
+                                map_with_objects[i + 1][j + 1] = 4 # Obstacle
+                    else:
+                        print("Invalid obstacle format:", obstacle)
             
             return map_with_objects, n, m, obstacles, CELL_SIZE
 

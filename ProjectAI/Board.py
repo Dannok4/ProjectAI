@@ -44,29 +44,29 @@ class Board:
                         map_matrix[i][j] = 3 # Seeker
                         pos_seeker = (j, i) # lấy vị trí seeker
                     elif row[j] == 1:
-                        map_matrix[i][j] = 1 # Wall
-                        
+                        map_matrix[i][j] = 1 # Wall                        
+                
+            m += 2
+            n += 2
+            map_with_objects = [[0 for _ in range(m)] for _ in range(n)]
+        
+            for i in range(n):
+                map_with_objects[i][0] = 1
+                map_with_objects[i][m - 1] = 1
+            for j in range(m):
+                map_with_objects[0][j] = 1
+                map_with_objects[n - 1][j] = 1
+
+            for i in range(0, n - 2):
+                for j in range(0, m - 2):
+                    map_with_objects[i + 1][j + 1] = map_matrix[i][j]
+                    
             if is_lv4 == True: # if level 4, read obstacle, else, no need to
                 obstacles = []
                 for _ in range(4):
                     obstacle_line = file.readline().split()
                     if obstacle_line:
-                        obstacles.append(list(map(int, obstacle_line)))       
-
-                m += 2
-                n += 2
-                map_with_objects = [[0 for _ in range(m)] for _ in range(n)]
-            
-                for i in range(n):
-                    map_with_objects[i][0] = 1
-                    map_with_objects[i][m - 1] = 1
-                for j in range(m):
-                    map_with_objects[0][j] = 1
-                    map_with_objects[n - 1][j] = 1
-
-                for i in range(0, n - 2):
-                    for j in range(0, m - 2):
-                        map_with_objects[i + 1][j + 1] = map_matrix[i][j]
+                        obstacles.append(list(map(int, obstacle_line))) 
 
                 for obstacle in obstacles:
                     if len(obstacle) == 4:

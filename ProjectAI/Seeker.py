@@ -7,7 +7,7 @@ class Seeker:
         self.position = (x, y) # Starting position
         # self.score = score
         self.seeker_pos = self.find_seeker_pos()
-
+        self.vision_radius = 3
     # Tìm vị trí seeker trong map
     def find_seeker_pos(self):
         for row in range(self.board.n):
@@ -248,29 +248,29 @@ class Seeker:
         self.check_vision_down_left()
         self.check_vision_down_right()
 
-    def seeker_go_right(self):
-        self.position = tuple(map(sum, zip(self.position, self.direction[0])))
+    # def seeker_go_right(self):
+    #     self.position = tuple(map(sum, zip(self.position, self.direction[0])))
     
-    def seeker_go_left(self):
-        self.position = tuple(map(sum, zip(self.position, self.direction[1])))
+    # def seeker_go_left(self):
+    #     self.position = tuple(map(sum, zip(self.position, self.direction[1])))
 
-    def seeker_go_down(self):
-        self.position = tuple(map(sum, zip(self.position, self.direction[2])))
+    # def seeker_go_down(self):
+    #     self.position = tuple(map(sum, zip(self.position, self.direction[2])))
 
-    def seeker_go_up(self):
-        self.position = tuple(map(sum, zip(self.position, self.direction[3])))
+    # def seeker_go_up(self):
+    #     self.position = tuple(map(sum, zip(self.position, self.direction[3])))
     
-    def seeker_go_down_right(self):
-        self.position = tuple(map(sum, zip(self.position, self.direction[4])))
+    # def seeker_go_down_right(self):
+    #     self.position = tuple(map(sum, zip(self.position, self.direction[4])))
 
-    def seeker_go_down_left(self):
-        self.position = tuple(map(sum, zip(self.position, self.direction[5])))
+    # def seeker_go_down_left(self):
+    #     self.position = tuple(map(sum, zip(self.position, self.direction[5])))
 
-    def seeker_go_up_right(self):
-        self.position = tuple(map(sum, zip(self.position, self.direction[6])))
+    # def seeker_go_up_right(self):
+    #     self.position = tuple(map(sum, zip(self.position, self.direction[6])))
 
-    def seeker_go_up_left(self):
-        self.position = tuple(map(sum, zip(self.position, self.direction[7])))
+    # def seeker_go_up_left(self):
+    #     self.position = tuple(map(sum, zip(self.position, self.direction[7])))
 
     #def seeker_can_see_hider(self, hider_position):
     # Kiểm tra xem vị trí của hider có nằm trong tầm nhìn của seeker hay không
@@ -306,7 +306,19 @@ class Seeker:
         if (row, col) in self.valid_vision_down_right:
             return True
         return False
-    
+    def check_announce_in_listening_radius(seeker_position, hider_announce, listening_radius):
+        x_seeker, y_seeker = seeker_position
+        x_announce, y_announce = hider_announce
+
+        # Tính khoảng cách Manhattan giữa seeker và tín hiệu thông báo từ hider
+        distance = abs(x_seeker - x_announce) + abs(y_seeker - y_announce)
+
+        # Nếu khoảng cách nhỏ hơn hoặc bằng bán kính lắng nghe, trả về True và vị trí của thông báo
+        if distance <= listening_radius:
+            return True, hider_announce
+        else:
+            return False, None 
+
     def manhattan_distance(a, b):
         return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
@@ -337,59 +349,60 @@ class Seeker:
                     heapq.heappush(open_set, (new_g + heuristic(neighbor, goal), new_g, neighbor, new_path))
 
         return None
-    
-    def check_valid_move(self, board, x, y, direction):       
-        # check valid movement for hider
-        if 0 <= x < board.m and 0 <= y < board.n:
-            if board.map_with_objects[y][x] == 0:
-                if direction == "left" or direction == "right" or direction == "up" or direction == "down":
-                    return True
-                else:
-                    if direction == "up_left":
-                        if (board.map_with_objects[y+1][x] == 1 or board.map_with_objects[y+1][x] == 4) and (board.map_with_objects[y][x+1] == 1 or board.map_with_objects[y][x+1] == 4): return False
-                        else: return True
+
+    # def check_valid_move(self, board, x, y, direction):       
+    #     # check valid movement for hider
+    #     if 0 <= x < board.m and 0 <= y < board.n:
+    #         if board.map_with_objects[y][x] == 0:
+    #             if direction == "left" or direction == "right" or direction == "up" or direction == "down":
+    #                 return True
+    #             else:
+    #                 if direction == "up_left":
+    #                     if (board.map_with_objects[y+1][x] == 1 or board.map_with_objects[y+1][x] == 4) and (board.map_with_objects[y][x+1] == 1 or board.map_with_objects[y][x+1] == 4): return False
+    #                     else: return True
                         
-                    if direction == "up_right":
-                        if (board.map_with_objects[y+1][x] == 1 or board.map_with_objects[y+1][x] == 4) and (board.map_with_objects[y][x-1] == 1 or board.map_with_objects[y][x-1] == 4): return False
-                        else: return True
+    #                 if direction == "up_right":
+    #                     if (board.map_with_objects[y+1][x] == 1 or board.map_with_objects[y+1][x] == 4) and (board.map_with_objects[y][x-1] == 1 or board.map_with_objects[y][x-1] == 4): return False
+    #                     else: return True
                         
-                    if direction == "down_left":
-                        if (board.map_with_objects[y-1][x] == 1 or board.map_with_objects[y-1][x] == 4) and (board.map_with_objects[y][x+1] == 1 or board.map_with_objects[y][x+1] == 4): return False
-                        else: return True
+    #                 if direction == "down_left":
+    #                     if (board.map_with_objects[y-1][x] == 1 or board.map_with_objects[y-1][x] == 4) and (board.map_with_objects[y][x+1] == 1 or board.map_with_objects[y][x+1] == 4): return False
+    #                     else: return True
                         
-                    if direction == "down_right":
-                        if (board.map_with_objects[y-1][x] == 1 or board.map_with_objects[y-1][x] == 4) and (board.map_with_objects[y][x-1] == 1 or board.map_with_objects[y][x-1] == 4): return False
-                        else: return True      
-            else: return False
-        else: return False
-        
-    def move(self, direction, board): # return next position or current position if move is invalid
-        # Move function for Seeker         
-        x, y = self.position
-        if direction == "left":
-            x -= 1
-        if direction == "right":
-            x += 1
-        if direction == "up":
-            y -= 1
-        if direction == "down":
-            y += 1
-        if direction == "up_left":
-            x -= 1
-            y -= 1
-        if direction == "up_right":
-            x += 1
-            y -= 1
-        if direction == "down_left":
-            x -= 1
-            y += 1
-        if direction == "down_right":
-            x += 1
-            y += 1
-        # Check if movement is valid
-        if self.check_valid_move(board, x, y, direction):
-            self.position = (x, y) # if valid, save position
-        return self.position
+    #                 if direction == "down_right":
+    #                     if (board.map_with_objects[y-1][x] == 1 or board.map_with_objects[y-1][x] == 4) and (board.map_with_objects[y][x-1] == 1 or board.map_with_objects[y][x-1] == 4): return False
+    #                     else: return True      
+    #         else: return False
+    #     else: return False
+      
+    # def move(self, direction, board): # return next position or current position if move is invalid
+    #     # Move function for Seeker         
+    #     x, y = self.position
+    #     if direction == "left":
+    #         x -= 1
+    #     if direction == "right":
+    #         x += 1
+    #     if direction == "up":
+    #         y -= 1
+    #     if direction == "down":
+    #         y += 1
+    #     if direction == "up_left":
+    #         x -= 1
+    #         y -= 1
+    #     if direction == "up_right":
+    #         x += 1
+    #         y -= 1
+    #     if direction == "down_left":
+    #         x -= 1
+    #         y += 1
+    #     if direction == "down_right":
+    #         x += 1
+    #         y += 1
+
+    #     # Check if movement is valid
+    #     if self.check_valid_move(board, x, y, direction):
+    #         self.position = (x, y) # if valid, save position
+    #     return self.position
 
     def successors(node, board_instance, map):
         x, y = node
@@ -415,8 +428,24 @@ class Seeker:
 
         return successors_list
     
-    def Seeker_move(self, board_instance, hider_position):
-        # Kiểm tra xem Hider có trong tầm nhìn của Seeker hay không
+    # def Seeker_move(self, board_instance, hider_position):
+    #     # Kiểm tra xem Hider có trong tầm nhìn của Seeker hay không
+    #     if self.seeker_can_see_hider():
+    #         # Nếu Hider nằm trong tầm nhìn của Seeker:
+    #         path = self.a_star_search_with_path_update(self.position, hider_position, self.manhattan_distance, self.neighbors)
+    #         if path:
+    #             next_position = path[1]  # Vị trí tiếp theo trong đường đi đến hider
+    #             self.position = next_position
+    #     else:
+    #         # Nếu Hider không có trong tầm nhìn, di chuyển theo các hướng có thể
+    #         successors_list = self.successors(self.position, board_instance, board_instance.map_with_objects)
+    #         if successors_list:
+    #             next_position = successors_list[0] # Chọn bước di chuyển đầu tiên
+    #             self.position = next_position
+    #     return self.position
+
+    def Seeker_move(self, board_instance, hider_position, announce_position):
+    # Kiểm tra xem Hider có trong tầm nhìn của Seeker hay không
         if self.seeker_can_see_hider():
             # Nếu Hider nằm trong tầm nhìn của Seeker:
             path = self.a_star_search_with_path_update(self.position, hider_position, self.manhattan_distance, self.neighbors)
@@ -424,9 +453,20 @@ class Seeker:
                 next_position = path[1]  # Vị trí tiếp theo trong đường đi đến hider
                 self.position = next_position
         else:
-            # Nếu Hider không có trong tầm nhìn, di chuyển theo các hướng có thể
-            successors_list = self.successors(self.position, board_instance, board_instance.map_with_objects)
-            if successors_list:
-                next_position = successors_list[0] # Chọn bước di chuyển đầu tiên
-                self.position = next_position
+            # Nếu Hider không có trong tầm nhìn, kiểm tra xem có thông báo từ Hider không
+            announce_exists, announcePosition = self.check_announce_in_listening_radius(self.position,  announce_position, listening_radius)
+            if announce_exists:
+                # Nếu có thông báo từ Hider và nằm trong bán kính lắng nghe, di chuyển theo thông báo
+                path = self.a_star_search_with_path_update(self.position, announcePosition, self.manhattan_distance, self.neighbors)
+                if path:
+                    next_position = path[1]  # Vị trí tiếp theo trong đường đi đến vị trí thông báo
+                    self.position = next_position
+            else:
+                # Nếu không có thông báo từ Hider, di chuyển theo các hướng có thể
+                successors_list = self.successors(self.position, board_instance, board_instance.map_with_objects)
+                if successors_list:
+                    next_position = successors_list[0] # Chọn bước di chuyển đầu tiên
+                    self.position = next_position
         return self.position
+
+

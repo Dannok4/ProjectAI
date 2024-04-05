@@ -15,7 +15,7 @@ def level1():
     while pos_seeker != pos_hider:
         if board.steps != 0 and board.steps % 5 == 0: # neu la luot thu 5 moi vong -> announce
             announce_position = hider.announce(board)
-            
+            seeker.Seekers_move(board, pos_hider, announce_position)
         #----------them vao dong nay ham nhin xung quanh / nghe xung quanh
         #----------neu thay hider / announce thi sao, khong thay thi sao
         
@@ -40,11 +40,11 @@ def level2():
         if board.steps != 0 and board.steps % 5 == 0: # neu la luot thu 5 moi vong -> announce
             for i in range(len(hiders)):
                 announce_position.append(hiders[i].announce(board))
-            
+                seeker.Seekers_move(board, pos_hider, announce_position)
         #----------them vao dong nay ham nhin xung quanh / nghe xung quanh
         #----------neu thay hider / announce thi sao, khong thay thi sao
         
         pos_seeker = seeker.position
         board.steps += 1
 
-def level3():
+#def level3():

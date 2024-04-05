@@ -6,17 +6,17 @@ class Seeker:
     def __init__(self, x, y):
         self.position = (x, y) # Starting position
         # self.score = score
-        self.seeker_pos = self.find_seeker_pos()
+        # self.seeker_pos = self.find_seeker_pos()
         self.vision_radius = 3
         self.point = 0
         
-    # Tìm vị trí seeker trong map
-    def find_seeker_pos(self):
-        for row in range(self.board.n):
-            for col in range(self.board.m):
-                if self.board.map_with_objects[row][col] == '3':
-                    return (row, col)
-        return None    
+    # # Tìm vị trí seeker trong map
+    # def find_seeker_pos(self):
+    #     for row in range(self.board.n):
+    #         for col in range(self.board.m):
+    #             if self.board.map_with_objects[row][col] == '3':
+    #                 return (row, col)
+    #     return None    
     
     def setVision(self):
         startX = max(0, self.position[0] - self.vision_radius)

@@ -15,6 +15,7 @@ class Seeker:
                 if self.board.map_with_objects[row][col] == '3':
                     return (row, col)
         return None    
+    
     def setVision(self):
         startX = max(0, self.position[0] - self.vision_radius)
         startY = max(0, self.position[1] - self.vision_radius)
@@ -271,7 +272,7 @@ class Seeker:
     def seeker_go_up_left(self):
         self.position = tuple(map(sum, zip(self.position, self.direction[7])))
 
-     #def seeker_can_see_hider(self, hider_position):
+    #def seeker_can_see_hider(self, hider_position):
     # Kiểm tra xem vị trí của hider có nằm trong tầm nhìn của seeker hay không
     def seeker_can_see_hider(self):
         hider_position = None
@@ -305,6 +306,7 @@ class Seeker:
         if (row, col) in self.valid_vision_down_right:
             return True
         return False
+    
     def manhattan_distance(a, b):
         return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
@@ -335,6 +337,7 @@ class Seeker:
                     heapq.heappush(open_set, (new_g + heuristic(neighbor, goal), new_g, neighbor, new_path))
 
         return None
+    
     def check_valid_move(self, board, x, y, direction):       
         # check valid movement for hider
         if 0 <= x < board.m and 0 <= y < board.n:
@@ -359,6 +362,7 @@ class Seeker:
                         else: return True      
             else: return False
         else: return False
+        
     def move(self, direction, board): # return next position or current position if move is invalid
         # Move function for Seeker         
         x, y = self.position
@@ -410,6 +414,7 @@ class Seeker:
                     successors_list.append((new_x, new_y))
 
         return successors_list
+    
     def Seeker_move(self, board_instance, hider_position):
         # Kiểm tra xem Hider có trong tầm nhìn của Seeker hay không
         if self.seeker_can_see_hider():

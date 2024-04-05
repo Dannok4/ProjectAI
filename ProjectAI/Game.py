@@ -75,7 +75,6 @@ def run_game():
     print("3. Level 3")
     print("4. Level 4")
     choice = input("Enter your choice (1-4): ")
-    return int(choice)
 
     # if choice == 1 or choice == 2:
     #     # Bắt đầu trò chơi với màn chơi 1, 2

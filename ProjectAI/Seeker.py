@@ -272,19 +272,32 @@ class Seeker:
                                      self.valid_vision_down_right)
     
 
-    def check_announce_in_listening_radius(seeker_position, hider_announce, listening_radius):
+    # def check_announce_in_listening_radius(seeker_position, hider_announce, listening_radius):
+    #     x_seeker, y_seeker = seeker_position
+    #     x_announce, y_announce = hider_announce
+
+    #     # Tính khoảng cách Manhattan giữa seeker và tín hiệu thông báo từ hider
+    #     distance = abs(x_seeker - x_announce) + abs(y_seeker - y_announce)
+
+    #     # Nếu khoảng cách nhỏ hơn hoặc bằng bán kính lắng nghe, trả về True và vị trí của thông báo
+    #     if distance <= listening_radius:
+    #         return True, hider_announce
+    #     else:
+    #         return False, None 
+
+    def check_announce_in_listening_radius(seeker_position, hider_announce, radius_Vision):
         x_seeker, y_seeker = seeker_position
         x_announce, y_announce = hider_announce
 
         # Tính khoảng cách Manhattan giữa seeker và tín hiệu thông báo từ hider
         distance = abs(x_seeker - x_announce) + abs(y_seeker - y_announce)
 
-        # Nếu khoảng cách nhỏ hơn hoặc bằng bán kính lắng nghe, trả về True và vị trí của thông báo
-        if distance <= listening_radius:
+        # Nếu khoảng cách nhỏ hơn hoặc bằng bán kính lắng nghe (radius_Vision), trả về True và vị trí của thông báo
+        if distance <= radius_Vision:
             return True, hider_announce
         else:
-            return False, None 
-
+            return False, None
+        
     def manhattan_distance(a, b):
         return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
@@ -352,7 +365,7 @@ class Seeker:
                 self.position = next_position
         else:
             # Nếu Hider không có trong tầm nhìn, kiểm tra xem có thông báo từ Hider không
-            announce_exists, announcePosition = self.check_announce_in_listening_radius(self.position,  announce_position, listening_radius)
+            announce_exists, announcePosition = self.check_announce_in_listening_radius(self.position,  announce_position, listening_radius=3)
             if announce_exists:
                 # Nếu có thông báo từ Hider và nằm trong bán kính lắng nghe, di chuyển theo thông báo
                 path = self.a_star_search_with_path_update(self.position, announcePosition, self.manhattan_distance, self.neighbors)

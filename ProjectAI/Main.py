@@ -3,7 +3,7 @@ from Seeker import *
 
 def main():
     pygame.init()
-    game_map = Board(r'C:\Users\paody\Documents\GitHub\ProjectAI\ProjectAI\map1_1.txt')
+    game_map = Board(r'C:\Project_AI\ProjectAI\map1_1.txt')
 
     # Calculate the size of the game window based on the size of the game board and the cell size
     screen_width = game_map.m * (game_map.CELL_SIZE + MARGIN) + MARGIN * 2

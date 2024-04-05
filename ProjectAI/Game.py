@@ -54,4 +54,4 @@ def level2():
         pos_seeker = seeker.position
         board.steps += 1
 
-def level3():
+#def level3():

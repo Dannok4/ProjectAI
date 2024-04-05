@@ -1,5 +1,5 @@
 ﻿from Board import *
-ăfrom Seeker import *
+from Seeker import *
 
 def main():
     pygame.init()

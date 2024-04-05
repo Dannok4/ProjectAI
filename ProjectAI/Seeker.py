@@ -8,6 +8,8 @@ class Seeker:
         # self.score = score
         self.seeker_pos = self.find_seeker_pos()
         self.vision_radius = 3
+        self.point = 0
+        
     # Tìm vị trí seeker trong map
     def find_seeker_pos(self):
         for row in range(self.board.n):

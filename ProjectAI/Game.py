@@ -89,7 +89,7 @@ def run_game():
     #     print("Invalid choice.")
     #     sys.exit()
     
-    if choice == 1 or choice == 2 or choice == 3 or choice == 4:
+    if choice == '1' or choice == '2' or choice == '3' or choice == '4':
         pygame.init()
         filename = ""
         board = Board(False, filename)

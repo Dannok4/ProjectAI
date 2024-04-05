@@ -8,7 +8,7 @@ GRAY = (128, 128, 128)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
-
+ORANGE = (255, 165, 0)
 MARGIN = 1
 
 class Board:    
@@ -75,6 +75,28 @@ class Board:
             return map_with_objects, n, m, obstacles, CELL_SIZE
 
     # Vẽ map bằng đồ họa
+    # def draw_map(self, screen, CELL_SIZE):
+    #     screen_width = self.m * (CELL_SIZE + MARGIN) + MARGIN * 2
+    #     screen_height = self.n * (CELL_SIZE + MARGIN) + MARGIN * 2
+
+    #     screen.fill(WHITE)
+    #     pygame.draw.rect(screen, GRAY, (MARGIN, MARGIN, screen_width - MARGIN * 2, screen_height - MARGIN * 2))
+        
+    #     for row in range(self.n):
+    #         for col in range(self.m):
+    #             color = WHITE
+    #             if self.map_with_objects[row][col] == 1:
+    #                 color = BLACK
+    #             elif self.map_with_objects[row][col] == 2:
+    #                 color = GREEN
+    #             elif self.map_with_objects[row][col] == 3:
+    #                 color = RED
+    #             elif self.map_with_objects[row][col] == 4:
+    #                 color = BLUE
+    #             pygame.draw.rect(screen, color,
+    #                             [(MARGIN + CELL_SIZE) * col + MARGIN,
+    #                             (MARGIN + CELL_SIZE) * row + MARGIN,
+    #                             CELL_SIZE, CELL_SIZE])
     def draw_map(self, screen, CELL_SIZE):
         screen_width = self.m * (CELL_SIZE + MARGIN) + MARGIN * 2
         screen_height = self.n * (CELL_SIZE + MARGIN) + MARGIN * 2
@@ -93,11 +115,17 @@ class Board:
                     color = RED
                 elif self.map_with_objects[row][col] == 4:
                     color = BLUE
+
+                # Vẽ phạm vi của seeker
+                if self.seeker_pos is not None:
+                    seeker_row, seeker_col = self.seeker_pos
+                    if abs(seeker_row - row) <= 3 and abs(seeker_col - col) <= 3:
+                        color = ORANGE  # Màu cam cho phạm vi của seeker
+
                 pygame.draw.rect(screen, color,
                                 [(MARGIN + CELL_SIZE) * col + MARGIN,
                                 (MARGIN + CELL_SIZE) * row + MARGIN,
                                 CELL_SIZE, CELL_SIZE])
-
 class Seeker:
     def __init__(self, board):
         self.board = board

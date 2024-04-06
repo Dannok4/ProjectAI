@@ -3,12 +3,33 @@ import pygame
 import heapq
 import math
 class Seeker:
-    def __init__(self, x, y):
-        self.position = (x, y) # Starting position
+    def __init__(self, x, y, bound, board):
+        self.position = (x, y) # Starting position x: hàng, y: cột
         # self.score = score
         # self.seeker_pos = self.find_seeker_pos()
         self.vision_radius = 3
         self.vision=self.setVision()
+        self.valid_vision = []
+        self.bound = bound
+        self.map = board
+
+        self.valid_vision_left = []
+        self.valid_vision_right = []
+        self.valid_vision_up = []
+        self.valid_vision_down = []
+
+        self.valid_vision_up_left = []
+        self.invalid_vision_up_left = []
+
+        self.valid_vision_up_right = []
+        self.invalid_vision_up_right = []
+
+        self.valid_vision_down_left = []
+        self.invalid_vision_down_left = []
+
+        self.valid_vision_down_right = []
+        self.invalid_vision_down_right = []
+
     # Tìm vị trí seeker trong map
     def find_seeker_pos(self):
         for row in range(self.board.n):
@@ -140,28 +161,28 @@ class Seeker:
 
     def check_vision_left(self):
         for i in range(1, self.vision_radius + 1):
-            if self.position[1] - i >= 0 and self.map[self.position[0]][self.position[1] - i] == 0:
+            if self.position[1] - i >= 0 and self.map.map_with_objects[self.position[0]][self.position[1] - i] == 0:
                 self.valid_vision_left.append((self.position[0], self.position[1] - i))
             else:
                 return
     
     def check_vision_right(self):
         for i in range (1, self.vision_radius + 1):
-            if self.position[1] + i < self.bound[1] and self.map[self.position[0]][self.position[1] + i] == 0:
+            if self.position[1] + i < self.bound[1] and self.map.map_with_objects[self.position[0]][self.position[1] + i] == 0:
                 self.valid_vision_right.append((self.position[0], self.position[1] + i))
             else:
                 return
 
     def check_vision_up(self):
         for i in range(1, self.vision_radius + 1):
-            if self.position[0] - i >= 0 and self.map[self.position[0] - i][self.position[1]] == 0:
+            if self.position[0] - i >= 0 and self.map.map_with_objects[self.position[0] - i][self.position[1]] == 0:
                 self.valid_vision_up.append((self.position[0] - i, self.position[1]))
             else:
                 return
     
     def check_vision_down(self):
         for i in range (1, self.vision_radius + 1):
-            if self.position[0] + i < self.bound[0] and self.map[self.position[0] + i][self.position[1]] == 0:
+            if self.position[0] + i < self.bound[0] and self.map.map_with_objects[self.position[0] + i][self.position[1]] == 0:
                 self.valid_vision_down.append((self.position[0] + i, self.position[1]))
             else:
                 return
@@ -169,7 +190,7 @@ class Seeker:
     def check_vision_up_left(self):
         for row in range (1, self.vision_radius + 1):
             for col in range (1, self.vision_radius + 1):
-                if self.position[0] - row >= 0 and self.position[1] - col >= 0 and self.check_invalid_vision_up_left(self.position[0] - row, self.position[1] - col) and self.map[self.position[0] - row][self.position[1] - col] == 0:
+                if self.position[0] - row >= 0 and self.position[1] - col >= 0 and self.check_invalid_vision_up_left(self.position[0] - row, self.position[1] - col) and self.map.map_with_objects[self.position[0] - row][self.position[1] - col] == 0:
                     self.valid_vision_up_left.append((self.position[0] - row, self.position[1] - col))
                 elif self.position[0] - row >= 0 and self.position[1] - col >= 0:
                     self.invalid_vision_up_left.append((self.position[0] - row, self.position[1] - col))
@@ -177,7 +198,7 @@ class Seeker:
     def check_vision_up_right(self):
         for row in range (1, self.vision_radius + 1):
             for col in range (1, self.vision_radius + 1):
-                if self.position[0] - row >= 0 and self.position[1] + col < self.bound[1] and self.check_invalid_vision_up_right(self.position[0] - row, self.position[1] + col) and self.map[self.position[0] - row][self.position[1] + col] == 0:
+                if self.position[0] - row >= 0 and self.position[1] + col < self.bound[1] and self.check_invalid_vision_up_right(self.position[0] - row, self.position[1] + col) and self.map.map_with_objects[self.position[0] - row][self.position[1] + col] == 0:
                     self.valid_vision_up_right.append((self.position[0] - row, self.position[1] + col))
                 elif self.position[0] - row >= 0 and self.position[1] + col < self.bound[1]:
                     self.invalid_vision_up_right.append((self.position[0] - row, self.position[1] + col))
@@ -185,7 +206,7 @@ class Seeker:
     def check_vision_down_left(self):
         for row in range (1, self.vision_radius + 1):
             for col in range (1, self.vision_radius + 1):
-                if self.position[0] + row < self.bound[0] and self.position[1] - col >= 0 and self.check_invalid_vision_down_left(self.position[0] + row, self.position[1] - col) and self.map[self.position[0] + row][self.position[1] - col] == 0:
+                if self.position[0] + row < self.bound[0] and self.position[1] - col >= 0 and self.check_invalid_vision_down_left(self.position[0] + row, self.position[1] - col) and self.map.map_with_objects[self.position[0] + row][self.position[1] - col] == 0:
                     self.valid_vision_down_left.append((self.position[0] + row, self.position[1] - col))
                 elif self.position[0] + row < self.bound[0] and self.position[1] - col >= 0:
                     self.invalid_vision_down_left.append((self.position[0] + row, self.position[1] - col))
@@ -193,10 +214,11 @@ class Seeker:
     def check_vision_down_right(self):
         for row in range (1, self.vision_radius + 1):
             for col in range (1, self.vision_radius + 1):
-                if self.position[0] + row < self.bound[0] and self.position[1] + col < self.bound[1] and self.check_invalid_vision_down_right(self.position[0] + row, self.position[1] + col) and self.map[self.position[0] + row][self.position[1] + col] == 0:
+                if self.position[0] + row < self.bound[0] and self.position[1] + col < self.bound[1] and self.check_invalid_vision_down_right(self.position[0] + row, self.position[1] + col) and self.map.map_with_objects[self.position[0] + row][self.position[1] + col] == 0:
                     self.valid_vision_down_right.append((self.position[0] + row, self.position[1] + col))
                 elif self.position[0] + row < self.bound[0] and self.position[1] + col < self.bound[1]:
                     self.invalid_vision_down_right.append((self.position[0] + row, self.position[1] + col))
+
 
     def seeker_valid_vision(self):
         self.vision
@@ -208,7 +230,35 @@ class Seeker:
         self.check_vision_up_right()
         self.check_vision_down_left()
         self.check_vision_down_right()
+        self.valid_vision = self.valid_vision_left + self.valid_vision_right + self.valid_vision_up + \
+                            self.valid_vision_down + self.valid_vision_up_left + self.valid_vision_up_right + \
+                            self.valid_vision_down_left + self.valid_vision_down_right
 
+    # di chuyển bằng phím
+    def move(self, direction):
+         row, col = self.position[0], self.position[1]
+         target_row = row
+         target_col = col
+         if direction == 'up':
+             target_row -= 1
+         elif direction == 'down':
+             target_row += 1
+         elif direction == 'left':
+             target_col -= 1
+         elif direction == 'right':
+             target_col += 1
+        
+         if 0 < target_row < len(self.map.map_with_objects) - 1 and 0 < target_col < len(self.map.map_with_objects[0]) - 1:
+             if self.map.map_with_objects[target_row][target_col] not in [1, 4]:
+                 self.map.map_with_objects[row][col] = 0
+                 self.map.map_with_objects[target_row][target_col] = 3
+                 self.seeker_pos = (target_row, target_col)
+             elif self.map.map_with_objects[target_row][target_col] == 4:   
+                 success = self.move_obstacle(direction, target_row, target_col)
+                 if success:
+                     self.map.map_with_objects[row][col] = 0
+                     self.map.map_with_objects[target_row][target_col] = 3
+                     self.seeker_pos = (target_row, target_col)
     
     # # Kiểm tra xem vị trí của hider có nằm trong tầm nhìn của seeker hay không
     # def seeker_can_see_hider(self):

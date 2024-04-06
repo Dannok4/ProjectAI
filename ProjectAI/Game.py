@@ -74,8 +74,7 @@ def run_game():
     print("2. Level 2")
     print("3. Level 3")
     print("4. Level 4")
-    choice = input("Enter your choice (1-4): ")
-    return int(choice)
+    choice = int(input("Enter your choice (1-4): "))
 
     # if choice == 1 or choice == 2:
     #     # Bắt đầu trò chơi với màn chơi 1, 2
@@ -92,7 +91,7 @@ def run_game():
     
     if choice == 1 or choice == 2 or choice == 3 or choice == 4:
         pygame.init()
-        filename = ""
+        filename = "map1_1.txt"
         board = Board(False, filename)
     
         # Calculate the size of the game window based on the size of the game board and the cell size

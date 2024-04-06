@@ -46,7 +46,6 @@ class Board:
                     elif row[j] == 1:
                         map_matrix[i][j] = 1 # Wall
                         
-            if is_lv4 == True: # if level 4, read obstacle, else, no need to
                 obstacles = []
                 for _ in range(4):
                     obstacle_line = file.readline().split()

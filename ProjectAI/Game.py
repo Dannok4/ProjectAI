@@ -91,7 +91,7 @@ def run_game():
     
     if choice == '1' or choice == '2' or choice == '3' or choice == '4':
         pygame.init()
-        filename = ""
+        filename = r"c:\Users\HO TIEN PHAT\Documents\GitHub\ProjectAI\ProjectAI\map1_1.txt"
         board = Board(False, filename)
     
         # Calculate the size of the game window based on the size of the game board and the cell size

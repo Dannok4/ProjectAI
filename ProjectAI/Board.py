@@ -1,4 +1,5 @@
 import pygame
+from Seeker import *
 import sys
 
 # Define colors
@@ -9,6 +10,7 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 ORANGE = (255, 165, 0)
+PINK = (255, 182, 193)
 MARGIN = 1
 
 class Board:    
@@ -20,6 +22,8 @@ class Board:
     def create_map(self, is_lv4, file_name):
         pos_seeker = (-1, 0)
         pos_hiders = []
+        map_with_objects = []
+        obstacles = []
         
         with open(file_name, 'r') as file:
             n, m = map(int, file.readline().split())
@@ -39,33 +43,35 @@ class Board:
                 for j in range(m):
                     if row[j] == 2:
                         map_matrix[i][j] = 2 # Hider
-                        pos_hiders.append((j, i)) # lấy vị trí các hiders
+                        pos_hiders.append((j + 1, i + 1)) # lấy vị trí các hiders
                     elif row[j] == 3:
                         map_matrix[i][j] = 3 # Seeker
-                        pos_seeker = (j, i) # lấy vị trí seeker
+                        pos_seeker = (i + 1, j + 1) # lấy vị trí seeker
                     elif row[j] == 1:
-                        map_matrix[i][j] = 1 # Wall
-                        
+                        map_matrix[i][j] = 1 # Wall                        
+                
+            m += 2
+            n += 2
+            map_with_objects = [[0 for _ in range(m)] for _ in range(n)]
+        
+            for i in range(n):
+                map_with_objects[i][0] = 1
+                map_with_objects[i][m - 1] = 1
+            for j in range(m):
+                map_with_objects[0][j] = 1
+                map_with_objects[n - 1][j] = 1
+                    map_with_objects[n - 1][j] = 1
+
+            for i in range(0, n - 2):
+                for j in range(0, m - 2):
+                    map_with_objects[i + 1][j + 1] = map_matrix[i][j]
+
+            if is_lv4 == True: # if level 4, read obstacle, else, no need to
                 obstacles = []
                 for _ in range(4):
                     obstacle_line = file.readline().split()
                     if obstacle_line:
-                        obstacles.append(list(map(int, obstacle_line)))       
-
-                m += 2
-                n += 2
-                map_with_objects = [[0 for _ in range(m)] for _ in range(n)]
-            
-                for i in range(n):
-                    map_with_objects[i][0] = 1
-                    map_with_objects[i][m - 1] = 1
-                for j in range(m):
-                    map_with_objects[0][j] = 1
-                    map_with_objects[n - 1][j] = 1
-
-                for i in range(0, n - 2):
-                    for j in range(0, m - 2):
-                        map_with_objects[i + 1][j + 1] = map_matrix[i][j]
+                        obstacles.append(list(map(int, obstacle_line))) 
 
                 for obstacle in obstacles:
                     if len(obstacle) == 4:
@@ -78,30 +84,6 @@ class Board:
             
             return map_with_objects, n, m, obstacles, CELL_SIZE, pos_seeker, pos_hiders
 
-
-    # Vẽ map bằng đồ họa
-    # def draw_map(self, screen, CELL_SIZE):
-    #     screen_width = self.m * (CELL_SIZE + MARGIN) + MARGIN * 2
-    #     screen_height = self.n * (CELL_SIZE + MARGIN) + MARGIN * 2
-
-    #     screen.fill(WHITE)
-    #     pygame.draw.rect(screen, GRAY, (MARGIN, MARGIN, screen_width - MARGIN * 2, screen_height - MARGIN * 2))
-        
-    #     for row in range(self.n):
-    #         for col in range(self.m):
-    #             color = WHITE
-    #             if self.map_with_objects[row][col] == 1:
-    #                 color = BLACK
-    #             elif self.map_with_objects[row][col] == 2:
-    #                 color = GREEN
-    #             elif self.map_with_objects[row][col] == 3:
-    #                 color = RED
-    #             elif self.map_with_objects[row][col] == 4:
-    #                 color = BLUE
-    #             pygame.draw.rect(screen, color,
-    #                             [(MARGIN + CELL_SIZE) * col + MARGIN,
-    #                             (MARGIN + CELL_SIZE) * row + MARGIN,
-    #                             CELL_SIZE, CELL_SIZE])
     def draw_map(self, screen, CELL_SIZE):
         screen_width = self.m * (CELL_SIZE + MARGIN) + MARGIN * 2
         screen_height = self.n * (CELL_SIZE + MARGIN) + MARGIN * 2
@@ -120,17 +102,22 @@ class Board:
                     color = RED
                 elif self.map_with_objects[row][col] == 4:
                     color = BLUE
-
-                # Vẽ phạm vi của seeker
-                if self.seeker_pos is not None:
-                    seeker_row, seeker_col = self.seeker_pos
-                    if abs(seeker_row - row) <= 3 and abs(seeker_col - col) <= 3:
-                        color = ORANGE  # Màu cam cho phạm vi của seeker
-
                 pygame.draw.rect(screen, color,
                                 [(MARGIN + CELL_SIZE) * col + MARGIN,
                                 (MARGIN + CELL_SIZE) * row + MARGIN,
                                 CELL_SIZE, CELL_SIZE])
+                
+                seeker = Seeker(self.pos_seeker[0], self.pos_seeker[1], (self.n, self.m), self)
+                seeker.seeker_valid_vision()
+
+                # Vẽ tầm nhìn của seeker
+                if (row, col) in seeker.valid_vision:
+                    pygame.draw.rect(screen, ORANGE,  # Choose color for valid vision (e.g., ORANGE)
+                                    [(MARGIN + CELL_SIZE) * col + MARGIN,
+                                    (MARGIN + CELL_SIZE) * row + MARGIN,
+                                    CELL_SIZE, CELL_SIZE])
+
+'''                
 class Seeker:
     def __init__(self, board):
         self.board = board
@@ -221,3 +208,4 @@ class Seeker:
                     self.board.map_with_objects[i][left] = 0          
             self.board.obstacles[obstacle_site] = (top - 1, left, bottom - 1, right)
         return True
+'''

@@ -65,13 +65,15 @@ class Hider:
         rand_announce = random.randint(1, 49) # random position
         x_hider, y_hider = self.position
         
-        dem = 1;
+        dem = 1
         for i in range(max(y_hider - 3, 0), min(y_hider + 3, board.n - 1) + 1):
             for j in range(max(x_hider - 3, 0), min(x_hider + 3, board.m - 1) + 1):
-                if dem == rand_announce: # correct position to announce
-                    self.announce_position = j, i # save announce position
-                    return (j, i)
-                else: dem += 1 # not correct, find another
+                if (i, j) != (y_hider, x_hider) and board.map_with_objects[i][j] != 1: # Avoid hider's position and walls
+                    if dem == rand_announce: # correct position to announce
+                        self.announce_position = j, i # save announce position
+                        return (j, i)
+                    else: 
+                        dem += 1 # not correct, find another
            
     def look_around(self, board): # return position of seeker
         x_hider, y_hider = self.position

@@ -74,7 +74,7 @@ def run_game():
     print("2. Level 2")
     print("3. Level 3")
     print("4. Level 4")
-    choice = int(input("Enter your choice (1-4): "))
+    choice = input("Enter your choice (1-4): ")
 
     # if choice == 1 or choice == 2:
     #     # Bắt đầu trò chơi với màn chơi 1, 2
@@ -89,10 +89,13 @@ def run_game():
     #     print("Invalid choice.")
     #     sys.exit()
     
-    if choice == 1 or choice == 2 or choice == 3 or choice == 4:
+    if choice == '1':
         pygame.init()
-        filename = "map1_1.txt"
+        filename = r"c:\Users\HO TIEN PHAT\Documents\GitHub\ProjectAI\ProjectAI\map1_1.txt"
         board = Board(False, filename)
+
+        seeker = Seeker(board.pos_seeker[0], board.pos_seeker[1], (board.n, board.m), board)
+        all_hiders = [Hider(pos[0], pos[1]) for pos in board.pos_hiders]
     
         # Calculate the size of the game window based on the size of the game board and the cell size
         screen_width = board.m * (board.CELL_SIZE + MARGIN) + MARGIN * 2
@@ -103,6 +106,11 @@ def run_game():
         screen = pygame.display.set_mode(screen_size)
         pygame.display.set_caption("Map Representation")
 
+        # Draw the initial game map
+        screen.fill(WHITE)
+        seeker = Seeker(board.pos_seeker[0], board.pos_seeker[1], (board.n, board.m), board)
+        board.draw_map(screen, board.CELL_SIZE)
+        pygame.display.flip()
 
         done = False
         clock = pygame.time.Clock()
@@ -112,10 +120,52 @@ def run_game():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     done = True
-                 
-            # Draw the game map
-            board.draw_map(screen, board.CELL_SIZE)
+                elif event.type == pygame.KEYDOWN:
+                    if not moved_this_loop:
+                        if event.key == pygame.K_a:
+                            seeker.move('left')
+                            board.pos_seeker = (seeker.position[0], seeker.position[1] - 1)
+                            moved_this_loop = True
+                            board.steps += 1
+                        elif event.key == pygame.K_d:
+                            seeker.move('right')
+                            board.pos_seeker = (seeker.position[0], seeker.position[1] + 1)
+                            moved_this_loop = True
+                            board.steps += 1
+                        elif event.key == pygame.K_w:
+                            seeker.move('up')
+                            board.pos_seeker = (seeker.position[0] - 1, seeker.position[1])
+                            moved_this_loop = True
+                            board.steps += 1
+                        elif event.key == pygame.K_s:
+                            seeker.move('down')
+                            board.pos_seeker = (seeker.position[0] + 1, seeker.position[1])
+                            moved_this_loop = True
+                            board.steps += 1
 
-            pygame.display.flip()
-            clock.tick(60)
+            if moved_this_loop:
+                screen.fill(WHITE)
+                seeker = Seeker(board.pos_seeker[0], board.pos_seeker[1], (board.n, board.m), board)
+                 
+                # Draw the game map
+                board.draw_map(screen, board.CELL_SIZE)
+
+                screen.fill(WHITE)
+                seeker = Seeker(board.pos_seeker[0], board.pos_seeker[1], (board.n, board.m), board)
+                board.draw_map(screen, board.CELL_SIZE)
+
+                # Draw announcements for hiders
+                if board.steps % 5 == 0 and board.steps > 0:
+                    for hider_pos in board.pos_hiders:
+                        hider = Hider(hider_pos[0], hider_pos[1])
+                        announce_pos = hider.announce(board)
+                        if announce_pos is not None:
+                            pygame.draw.rect(screen, PINK,
+                                            [(MARGIN + board.CELL_SIZE) * announce_pos[0] + MARGIN,
+                                            (MARGIN + board.CELL_SIZE) * announce_pos[1] + MARGIN,
+                                            board.CELL_SIZE, board.CELL_SIZE])
+                        
+                pygame.display.flip()
+                clock.tick(60)
         pygame.quit()
+        

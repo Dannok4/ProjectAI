@@ -1,4 +1,5 @@
 import pygame
+from Seeker import *
 import sys
 
 # Define colors
@@ -9,6 +10,7 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 ORANGE = (255, 165, 0)
+PINK = (255, 182, 193)
 MARGIN = 1
 
 class Board:    
@@ -41,10 +43,10 @@ class Board:
                 for j in range(m):
                     if row[j] == 2:
                         map_matrix[i][j] = 2 # Hider
-                        pos_hiders.append((j, i)) # lấy vị trí các hiders
+                        pos_hiders.append((j + 1, i + 1)) # lấy vị trí các hiders
                     elif row[j] == 3:
                         map_matrix[i][j] = 3 # Seeker
-                        pos_seeker = (j, i) # lấy vị trí seeker
+                        pos_seeker = (i + 1, j + 1) # lấy vị trí seeker
                     elif row[j] == 1:
                         map_matrix[i][j] = 1 # Wall                        
                 
@@ -103,14 +105,18 @@ class Board:
                                 [(MARGIN + CELL_SIZE) * col + MARGIN,
                                 (MARGIN + CELL_SIZE) * row + MARGIN,
                                 CELL_SIZE, CELL_SIZE])
-
-                # Vẽ phạm vi của seeker
-                #if self.seeker_pos is not None:
-                #    seeker_row, seeker_col = self.seeker_pos
-                #    if abs(seeker_row - row) <= 3 and abs(seeker_col - col) <= 3:
-                #        color = ORANGE  # Màu cam cho phạm vi của seeker
-
                 
+                seeker = Seeker(self.pos_seeker[0], self.pos_seeker[1], (self.n, self.m), self)
+                seeker.seeker_valid_vision()
+
+                # Vẽ tầm nhìn của seeker
+                if (row, col) in seeker.valid_vision:
+                    pygame.draw.rect(screen, ORANGE,  # Choose color for valid vision (e.g., ORANGE)
+                                    [(MARGIN + CELL_SIZE) * col + MARGIN,
+                                    (MARGIN + CELL_SIZE) * row + MARGIN,
+                                    CELL_SIZE, CELL_SIZE])
+
+'''                
 class Seeker:
     def __init__(self, board):
         self.board = board
@@ -201,3 +207,4 @@ class Seeker:
                     self.board.map_with_objects[i][left] = 0          
             self.board.obstacles[obstacle_site] = (top - 1, left, bottom - 1, right)
         return True
+'''

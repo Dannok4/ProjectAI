@@ -260,40 +260,6 @@ class Seeker:
                      self.map.map_with_objects[target_row][target_col] = 3
                      self.seeker_pos = (target_row, target_col)
     
-    # # Kiểm tra xem vị trí của hider có nằm trong tầm nhìn của seeker hay không
-    # def seeker_can_see_hider(self):
-    #     hider_position = None
-
-    #     # Tìm vị trí của hider trong tầm nhìn của seeker
-    #     for i in range(len(self.vision)):
-    #         for j in range(len(self.vision[0])):
-    #             if self.vision[i][j] == 2:
-    #                 hider_position = (i, j)
-    #                 break
-    #     # Nếu không tìm thấy vị trí của hider, không thể nhìn thấy
-    #     if hider_position is None:
-    #         return False
-    #     # Kiểm tra xem vị trí của hider có nằm trong tầm nhìn của seeker hay không
-    #     row, col = hider_position
-    #     # Kiểm tra tầm nhìn theo các hướng
-    #     if (row, col) in self.valid_vision_left:
-    #         return True
-    #     if (row, col) in self.valid_vision_right:
-    #         return True
-    #     if (row, col) in self.valid_vision_up:
-    #         return True
-    #     if (row, col) in self.valid_vision_down:
-    #         return True
-    #     if (row, col) in self.valid_vision_up_left:
-    #         return True
-    #     if (row, col) in self.valid_vision_up_right:
-    #         return True
-    #     if (row, col) in self.valid_vision_down_left:
-    #         return True
-    #     if (row, col) in self.valid_vision_down_right:
-    #         return True
-    #     return False
-    
     def seeker_can_see_hider(self):
     # Cập nhật tầm nhìn hợp lệ của Seeker trước khi kiểm tra
         self.seeker_valid_vision()
@@ -320,20 +286,6 @@ class Seeker:
                                      self.valid_vision_up_right +
                                      self.valid_vision_down_left +
                                      self.valid_vision_down_right)
-    
-
-    # def check_announce_in_listening_radius(seeker_position, hider_announce, listening_radius):
-    #     x_seeker, y_seeker = seeker_position
-    #     x_announce, y_announce = hider_announce
-
-    #     # Tính khoảng cách Manhattan giữa seeker và tín hiệu thông báo từ hider
-    #     distance = abs(x_seeker - x_announce) + abs(y_seeker - y_announce)
-
-    #     # Nếu khoảng cách nhỏ hơn hoặc bằng bán kính lắng nghe, trả về True và vị trí của thông báo
-    #     if distance <= listening_radius:
-    #         return True, hider_announce
-    #     else:
-    #         return False, None 
 
     def check_announce_in_listening_radius(seeker_position, hider_announce, radius_Vision):
         x_seeker, y_seeker = seeker_position

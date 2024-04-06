@@ -96,7 +96,9 @@ def run_game():
 
         seeker = Seeker(board.pos_seeker[0], board.pos_seeker[1], (board.n, board.m), board)
         all_hiders = [Hider(pos[0], pos[1]) for pos in board.pos_hiders]
-    
+        num_hiders = len(all_hiders)
+        finded_hider = 0
+
         # Calculate the size of the game window based on the size of the game board and the cell size
         screen_width = board.m * (board.CELL_SIZE + MARGIN) + MARGIN * 2
         screen_height = board.n * (board.CELL_SIZE + MARGIN) + MARGIN * 2
@@ -114,51 +116,36 @@ def run_game():
 
         done = False
         clock = pygame.time.Clock()
-        while not done:
-            moved_this_loop = False
-        
+        while not done and finded_hider < num_hiders:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    done = True
-                elif event.type == pygame.KEYDOWN:
-                    if not moved_this_loop:
-                        if event.key == pygame.K_a:
-                            seeker.move('left')
-                            board.pos_seeker = (seeker.position[0], seeker.position[1] - 1)
-                            moved_this_loop = True
-                            board.steps += 1
-                        elif event.key == pygame.K_d:
-                            seeker.move('right')
-                            board.pos_seeker = (seeker.position[0], seeker.position[1] + 1)
-                            moved_this_loop = True
-                            board.steps += 1
-                        elif event.key == pygame.K_w:
-                            seeker.move('up')
-                            board.pos_seeker = (seeker.position[0] - 1, seeker.position[1])
-                            moved_this_loop = True
-                            board.steps += 1
-                        elif event.key == pygame.K_s:
-                            seeker.move('down')
-                            board.pos_seeker = (seeker.position[0] + 1, seeker.position[1])
-                            moved_this_loop = True
-                            board.steps += 1
+                    done = True    
 
-            if moved_this_loop:
+                hider_announce = []
+                # Move seeker using the algorithm
+                board.pos_seeker, finded_hider = seeker.Seeker_move(hider_announce)                                     
+                board.steps += 1 
+
+
                 screen.fill(WHITE)
                 seeker = Seeker(board.pos_seeker[0], board.pos_seeker[1], (board.n, board.m), board)
                  
                 # Draw the game map
                 board.draw_map(screen, board.CELL_SIZE)
+                board.draw_vision(screen, board.CELL_SIZE)
 
-                screen.fill(WHITE)
-                seeker = Seeker(board.pos_seeker[0], board.pos_seeker[1], (board.n, board.m), board)
-                board.draw_map(screen, board.CELL_SIZE)
+                #screen.fill(WHITE)
+                #seeker = Seeker(board.pos_seeker[0], board.pos_seeker[1], (board.n, board.m), board)
+                #board.draw_map(screen, board.CELL_SIZE)
 
+                
                 # Draw announcements for hiders
                 if board.steps % 5 == 0 and board.steps > 0:
+                    hider_announce.clear()
                     for hider_pos in board.pos_hiders:
                         hider = Hider(hider_pos[0], hider_pos[1])
                         announce_pos = hider.announce(board)
+                        hider_announce.append(announce_pos)
                         if announce_pos is not None:
                             pygame.draw.rect(screen, PINK,
                                             [(MARGIN + board.CELL_SIZE) * announce_pos[0] + MARGIN,
@@ -166,6 +153,12 @@ def run_game():
                                             board.CELL_SIZE, board.CELL_SIZE])
                         
                 pygame.display.flip()
-                clock.tick(60)
-        pygame.quit()
+                clock.tick(1)
+        
+
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN or event.type == pygame.QUIT:
+                    pygame.quit()
+                    quit()  # Thoát khỏi chương trình hoàn toàn
         

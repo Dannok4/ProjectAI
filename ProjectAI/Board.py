@@ -1,5 +1,6 @@
 import pygame
 from Seeker import *
+from Hider import *
 import sys
 
 # Define colors
@@ -24,7 +25,7 @@ class Board:
         pos_hiders = []
         map_with_objects = []
         obstacles = []
-        
+
         with open(file_name, 'r') as file:
             n, m = map(int, file.readline().split())
             map_matrix = [[0 for _ in range(m)] for _ in range(n)]
@@ -48,8 +49,8 @@ class Board:
                         map_matrix[i][j] = 3 # Seeker
                         pos_seeker = (i + 1, j + 1) # lấy vị trí seeker
                     elif row[j] == 1:
-                        map_matrix[i][j] = 1 # Wall                        
-                
+                        map_matrix[i][j] = 1 # Wall    
+
             m += 2
             n += 2
             map_with_objects = [[0 for _ in range(m)] for _ in range(n)]
@@ -60,7 +61,6 @@ class Board:
             for j in range(m):
                 map_with_objects[0][j] = 1
                 map_with_objects[n - 1][j] = 1
-                    map_with_objects[n - 1][j] = 1
 
             for i in range(0, n - 2):
                 for j in range(0, m - 2):
@@ -71,7 +71,7 @@ class Board:
                 for _ in range(4):
                     obstacle_line = file.readline().split()
                     if obstacle_line:
-                        obstacles.append(list(map(int, obstacle_line))) 
+                        obstacles.append(list(map(int, obstacle_line)))
 
                 for obstacle in obstacles:
                     if len(obstacle) == 4:
@@ -103,9 +103,9 @@ class Board:
                 elif self.map_with_objects[row][col] == 4:
                     color = BLUE
                 pygame.draw.rect(screen, color,
-                                [(MARGIN + CELL_SIZE) * col + MARGIN,
-                                (MARGIN + CELL_SIZE) * row + MARGIN,
-                                CELL_SIZE, CELL_SIZE])
+                            [(MARGIN + CELL_SIZE) * col + MARGIN,
+                            (MARGIN + CELL_SIZE) * row + MARGIN,
+                            CELL_SIZE, CELL_SIZE])
                 
     def draw_vision(self, screen, CELL_SIZE):            
         seeker = Seeker(self.pos_seeker[0], self.pos_seeker[1], (self.n, self.m), self)
@@ -140,7 +140,7 @@ class Board:
                                     [(MARGIN + CELL_SIZE) * col + MARGIN,
                                     (MARGIN + CELL_SIZE) * row + MARGIN,
                                     CELL_SIZE, CELL_SIZE])
-
+                    
 '''                
 class Seeker:
     def __init__(self, board):

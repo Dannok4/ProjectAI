@@ -60,6 +60,7 @@ class Board:
             for j in range(m):
                 map_with_objects[0][j] = 1
                 map_with_objects[n - 1][j] = 1
+                    map_with_objects[n - 1][j] = 1
 
             for i in range(0, n - 2):
                 for j in range(0, m - 2):

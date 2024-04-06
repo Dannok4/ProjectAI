@@ -106,10 +106,34 @@ class Board:
                                 (MARGIN + CELL_SIZE) * row + MARGIN,
                                 CELL_SIZE, CELL_SIZE])
                 
-                seeker = Seeker(self.pos_seeker[0], self.pos_seeker[1], (self.n, self.m), self)
-                seeker.seeker_valid_vision()
+    def draw_vision(self, screen, CELL_SIZE):            
+        seeker = Seeker(self.pos_seeker[0], self.pos_seeker[1], (self.n, self.m), self)
+        seeker.seeker_valid_vision()
 
-                # Vẽ tầm nhìn của seeker
+        # Lấy tọa độ của Seeker
+        seeker_row, seeker_col = seeker.position
+
+        # Xóa tất cả các ô tầm nhìn cũ (trừ các tường hoặc hider)
+        for pos in seeker.valid_vision:
+            row, col = pos
+            # Kiểm tra xem ô có phải là tường hoặc hider không
+            if self.map_with_objects[row][col] not in [1,2]:
+                pygame.draw.rect(screen, WHITE,  # Chọn màu nền của bản đồ
+                                [(MARGIN + CELL_SIZE) * col + MARGIN,
+                                (MARGIN + CELL_SIZE) * row + MARGIN,
+                                CELL_SIZE, CELL_SIZE])
+        
+        # Vẽ Seeker
+        pygame.draw.rect(screen, RED,  # Chọn màu đỏ cho Seeker
+                    [(MARGIN + CELL_SIZE) * seeker_col + MARGIN,
+                    (MARGIN + CELL_SIZE) * seeker_row + MARGIN,
+                    CELL_SIZE, CELL_SIZE])
+        
+        # Vẽ tầm nhìn của seeker
+        vision_range = 3
+
+        for row in range(seeker_row - vision_range, seeker_row + vision_range + 1):
+            for col in range(seeker_col - vision_range, seeker_col + vision_range + 1):
                 if (row, col) in seeker.valid_vision:
                     pygame.draw.rect(screen, ORANGE,  # Choose color for valid vision (e.g., ORANGE)
                                     [(MARGIN + CELL_SIZE) * col + MARGIN,

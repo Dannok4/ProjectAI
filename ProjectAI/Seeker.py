@@ -258,7 +258,6 @@ class Seeker:
                      self.map.map_with_objects[row][col] = 0
                      self.map.map_with_objects[target_row][target_col] = 3
                      self.seeker_pos = (target_row, target_col)
-<<<<<<< HEAD
 
     # # Kiểm tra xem vị trí của hider có nằm trong tầm nhìn của seeker hay không
     # def seeker_can_see_hider(self):
@@ -293,8 +292,6 @@ class Seeker:
     #     if (row, col) in self.valid_vision_down_right:
     #         return True
     #     return False
-=======
->>>>>>> 61bc9be441ef765c82fa5c69f0651c4557baf415
     
     def seeker_can_see_hider(self):
     # Cập nhật tầm nhìn hợp lệ của Seeker trước khi kiểm tra
@@ -303,7 +300,6 @@ class Seeker:
         hider_position = None
 
         # Tìm vị trí của hider trong tầm nhìn của seeker
-<<<<<<< HEAD
         for (i, j) in self.valid_vision:
             if(self.map.map_with_objects[i][j] == 2):
                 hider_position = (i, j)
@@ -325,27 +321,6 @@ class Seeker:
     #     else:
     #         return False, None 
     
-=======
-        for i in range(len(self.vision)):
-            for j in range(len(self.vision[0])):
-                if self.vision[i][j] == 2:
-                    hider_position = (i, j)
-                    break
-
-        # Nếu không tìm thấy vị trí của hider, không thể nhìn thấy
-        if hider_position is None:
-            return False
-
-        # Kiểm tra xem vị trí của hider có trong tầm nhìn hợp lệ của seeker không
-        return hider_position in set(self.valid_vision_left +
-                                     self.valid_vision_right +
-                                     self.valid_vision_up +
-                                     self.valid_vision_down +
-                                     self.valid_vision_up_left +
-                                     self.valid_vision_up_right +
-                                     self.valid_vision_down_left +
-                                     self.valid_vision_down_right)
->>>>>>> 61bc9be441ef765c82fa5c69f0651c4557baf415
 
     def check_announce_in_listening_radius(self, seeker_position, hider_announce, radius_Vision):
         x_seeker, y_seeker = seeker_position

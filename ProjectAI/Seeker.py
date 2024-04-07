@@ -233,6 +233,33 @@ class Seeker:
         self.valid_vision = self.valid_vision_left + self.valid_vision_right + self.valid_vision_up + \
                             self.valid_vision_down + self.valid_vision_up_left + self.valid_vision_up_right + \
                             self.valid_vision_down_left + self.valid_vision_down_right
+    
+    # def seeker_valid_vision(self):
+    #     self.valid_vision = []
+
+    #     # Kiểm tra các hướng xung quanh theo vision_radius
+    #     for dr in range(-self.vision_radius, self.vision_radius + 1):
+    #         for dc in range(-self.vision_radius, self.vision_radius + 1):
+    #             if dr == 0 and dc == 0:
+    #                 continue  # Bỏ qua vị trí hiện tại
+
+    #             # Duyệt qua các vị trí trong hướng (dr, dc)
+    #             target_row = self.position[0] + dr
+    #             target_col = self.position[1] + dc
+
+    #             # Kiểm tra xem vị trí này có hợp lệ không
+    #             if 0 <= target_row < self.bound[0] and 0 <= target_col < self.bound[1]:
+    #                 if self.map.map_with_objects[target_row][target_col] == 0:
+    #                     # Nếu không có vật cản, thêm vào danh sách các vị trí hợp lệ
+    #                     self.valid_vision.append((target_row, target_col))
+    #                 else:
+    #                     # Nếu gặp vật cản, ngừng duyệt các vị trí trong hướng này
+    #                     break
+
+
+
+
+
 
     # di chuyển bằng phím
     def move(self, direction):

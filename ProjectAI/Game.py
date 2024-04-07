@@ -91,7 +91,7 @@ def run_game():
     
     if choice == '1':
         pygame.init()
-        filename = r"c:\Users\HO TIEN PHAT\Documents\GitHub\ProjectAI\ProjectAI\map1_1.txt"
+        filename = r"C:\Project_AI\ProjectAI\map1_1.txt"
         board = Board(False, filename)
 
         seeker = Seeker(board.pos_seeker[0], board.pos_seeker[1], (board.n, board.m), board)

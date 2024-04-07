@@ -14,6 +14,7 @@ ORANGE = (255, 165, 0)
 PINK = (255, 182, 193)
 MARGIN = 1
 
+
 class Board:    
     def __init__(self, is_lv4, file_name):
         self.map_with_objects, self.n, self.m, self.obstacles, self.CELL_SIZE, self.pos_seeker, self.pos_hiders = self.create_map(is_lv4, file_name)
@@ -84,152 +85,189 @@ class Board:
             
             return map_with_objects, n, m, obstacles, CELL_SIZE, pos_seeker, pos_hiders
 
-    def draw_map(self, screen, CELL_SIZE):
-        screen_width = self.m * (CELL_SIZE + MARGIN) + MARGIN * 2
-        screen_height = self.n * (CELL_SIZE + MARGIN) + MARGIN * 2
+    def draw_map(self, screen, seeker, all_hiders, countdown, score):
+        # Kích thước của màn hình với một cột bổ sung cho đồng hồ và điểm số
+        screen_width = self.m * (self.CELL_SIZE + MARGIN) + MARGIN * 3 + 200  # Thêm 200 pixel cho cột đồng hồ và điểm số
+        screen_height = self.n * (self.CELL_SIZE + MARGIN) + MARGIN * 2
 
+        # Vẽ background màu trắng
         screen.fill(WHITE)
-        pygame.draw.rect(screen, GRAY, (MARGIN, MARGIN, screen_width - MARGIN * 2, screen_height - MARGIN * 2))
-        
+
+        # Vẽ bản đồ
+        pygame.draw.rect(screen, GRAY, (MARGIN, MARGIN, screen_width - MARGIN * 3 - 200, screen_height - MARGIN * 2))  # Giảm đi 200 pixel cho cột đồng hồ và điểm số
+
+        #Vẽ đường đi và tường
         for row in range(self.n):
             for col in range(self.m):
-                color = WHITE
                 if self.map_with_objects[row][col] == 1:
-                    color = BLACK
-                elif self.map_with_objects[row][col] == 2:
-                    color = GREEN
-                elif self.map_with_objects[row][col] == 3:
-                    color = RED
-                elif self.map_with_objects[row][col] == 4:
-                    color = BLUE
-                pygame.draw.rect(screen, color,
-                            [(MARGIN + CELL_SIZE) * col + MARGIN,
-                            (MARGIN + CELL_SIZE) * row + MARGIN,
-                            CELL_SIZE, CELL_SIZE])
-                
-    def draw_vision(self, screen, CELL_SIZE):            
-        seeker = Seeker(self.pos_seeker[0], self.pos_seeker[1], (self.n, self.m), self)
-        seeker.seeker_valid_vision()
+                    pygame.draw.rect(screen, BLACK,
+                                [(MARGIN + self.CELL_SIZE) * col + MARGIN,
+                                (MARGIN + self.CELL_SIZE) * row + MARGIN,
+                                self.CELL_SIZE, self.CELL_SIZE])
 
+        # Vẽ tầm nhìn của seeker
+        self.draw_vision(screen, seeker)
+    
+        #Vẽ Hider                        
+        for hider in all_hiders:
+            hider_col, hider_row = hider.position
+            pygame.draw.rect(screen, GREEN,
+                                [(MARGIN + self.CELL_SIZE) * hider_col + MARGIN,
+                                (MARGIN + self.CELL_SIZE) * hider_row + MARGIN,
+                                self.CELL_SIZE, self.CELL_SIZE])
+            
         # Lấy tọa độ của Seeker
         seeker_row, seeker_col = seeker.position
 
+        # Vẽ Seeker
+        pygame.draw.rect(screen, RED,
+                        [(MARGIN + self.CELL_SIZE) * seeker_col + MARGIN,
+                        (MARGIN + self.CELL_SIZE) * seeker_row + MARGIN,
+                        self.CELL_SIZE, self.CELL_SIZE])
+
+        # Vẽ cột bên phải chứa đồng hồ đếm ngược và điểm số
+        pygame.draw.rect(screen, GRAY, (screen_width - 200, MARGIN, 200, screen_height - MARGIN * 2))
+        font = pygame.font.SysFont(None, 30)
+
+        # Vẽ đồng hồ đếm ngược
+        #countdown_text = font.render("Time: " + str(countdown), True, BLACK)
+        #screen.blit(countdown_text, (screen_width - 190, 120))  # Đặt đồng hồ đếm ngược ở bên phải trên của màn hình
+
+        # Vẽ điểm số
+        score_text = font.render("Score: " + str(score), True, BLACK)
+        screen.blit(score_text, (screen_width - 190, 80))  # Đặt điểm số ở bên phải dưới của màn hình
+
+        # Vẽ số lượng hider còn lại
+        hider_text = font.render("Hider: " + str(len(all_hiders)), True, BLACK)
+        screen.blit(hider_text, (screen_width - 190, 40))  # Đặt điểm số ở bên phải dưới của màn hình
+                
+    def draw_vision(self, screen, seeker):                
         # Xóa tất cả các ô tầm nhìn cũ (trừ các tường hoặc hider)
         for pos in seeker.valid_vision:
             row, col = pos
-            # Kiểm tra xem ô có phải là tường hoặc hider không
-            if self.map_with_objects[row][col] not in [1,2]:
-                pygame.draw.rect(screen, WHITE,  # Chọn màu nền của bản đồ
-                                [(MARGIN + CELL_SIZE) * col + MARGIN,
-                                (MARGIN + CELL_SIZE) * row + MARGIN,
-                                CELL_SIZE, CELL_SIZE])
-        
-        # Vẽ Seeker
-        pygame.draw.rect(screen, RED,  # Chọn màu đỏ cho Seeker
-                    [(MARGIN + CELL_SIZE) * seeker_col + MARGIN,
-                    (MARGIN + CELL_SIZE) * seeker_row + MARGIN,
-                    CELL_SIZE, CELL_SIZE])
+            # Kiểm tra xem ô có phải là đường đi không
+            if self.map_with_objects[row][col] == 0:
+                pygame.draw.rect(screen, GRAY,  # Chọn màu nền của bản đồ
+                                [(MARGIN + self.CELL_SIZE) * col + MARGIN,
+                                (MARGIN + self.CELL_SIZE) * row + MARGIN,
+                                self.CELL_SIZE, self.CELL_SIZE])
+                
+        seeker.seeker_valid_vision()       
         
         # Vẽ tầm nhìn của seeker
-        vision_range = 3
+        for (row, col) in seeker.valid_vision:
+            pygame.draw.rect(screen, ORANGE,  # Choose color for valid vision (e.g., ORANGE)
+                            [(MARGIN + self.CELL_SIZE) * col + MARGIN,
+                            (MARGIN + self.CELL_SIZE) * row + MARGIN,
+                            self.CELL_SIZE, self.CELL_SIZE])
+            
+    def draw_announce(self, screen, all_hiders, hider_announce):
+        hider_announce.clear()
+        for hider in all_hiders:
+            announce_pos = hider.announce(self) 
+            if announce_pos is not None:
+                hider_announce.append(announce_pos)
+                pygame.draw.rect(screen, PINK,
+                                [(MARGIN + self.CELL_SIZE) * announce_pos[0] + MARGIN,
+                                (MARGIN + self.CELL_SIZE) * announce_pos[1] + MARGIN,
+                                self.CELL_SIZE, self.CELL_SIZE])
+        return hider_announce
 
-        for row in range(seeker_row - vision_range, seeker_row + vision_range + 1):
-            for col in range(seeker_col - vision_range, seeker_col + vision_range + 1):
-                if (row, col) in seeker.valid_vision:
-                    pygame.draw.rect(screen, ORANGE,  # Choose color for valid vision (e.g., ORANGE)
-                                    [(MARGIN + CELL_SIZE) * col + MARGIN,
-                                    (MARGIN + CELL_SIZE) * row + MARGIN,
-                                    CELL_SIZE, CELL_SIZE])
-                    
-'''                
-class Seeker:
-    def __init__(self, board):
-        self.board = board
-        self.seeker_pos = self.find_seeker_pos()
 
-    # Tìm vị trí seeker trong map
-    def find_seeker_pos(self):
-        for row in range(self.board.n):
-            for col in range(self.board.m):
-                if self.board.map_with_objects[row][col] == 3:
-                    return (row, col)
-        return None
+    # Hàm chuyển đổi danh sách các phần tử thành danh sách các tọa độ tương ứng
+    def convert_to_coordinates(self, sections):
+        coordinates = []
+        for section in sections:
+            if section == 'center':
+                coordinates.append(self.get_center_pos())
+            elif section == 'top_left':
+                coordinates.append((1, 1))
+            elif section == 'top_right':
+                coordinates.append((1, self.m - 2))
+            elif section == 'bottom_left':
+                coordinates.append((self.n - 2, 1))
+            elif section == 'bottom_right':
+                coordinates.append((self.n - 2, self.m - 2))
+        return coordinates
 
-    # # Di chuyển Seeker bằng phím
-    # def move(self, direction):
-    #     row, col = self.seeker_pos
-    #     target_row = row
-    #     target_col = col
-    #     if direction == 'up':
-    #         target_row -= 1
-    #     elif direction == 'down':
-    #         target_row += 1
-    #     elif direction == 'left':
-    #         target_col -= 1
-    #     elif direction == 'right':
-    #         target_col += 1
+    def get_priority_direction(self):
+        # Lấy kích thước của bản đồ
+        n_rows, n_cols = self.n, self.m
+
+        # Chia map thành 4 phần
+        center_row, center_col = n_rows // 2, n_cols // 2
+        top_left = [(r, c) for r in range(center_row) for c in range(center_col)]
+        top_right = [(r, c) for r in range(center_row) for c in range(center_col, n_cols)]
+        bottom_left = [(r, c) for r in range(center_row, n_rows) for c in range(center_col)]
+        bottom_right = [(r, c) for r in range(center_row, n_rows) for c in range(center_col, n_cols)]
+
         
-    #     if 0 < target_row < len(self.board.map_with_objects) - 1 and 0 < target_col < len(self.board.map_with_objects[0]) - 1:
-    #         if self.board.map_with_objects[target_row][target_col] not in [1, 4]:
-    #             self.board.map_with_objects[row][col] = 0
-    #             self.board.map_with_objects[target_row][target_col] = 3
-    #             self.seeker_pos = (target_row, target_col)
-    #         elif self.board.map_with_objects[target_row][target_col] == 4:   
-    #             success = self.move_obstacle(direction, target_row, target_col)
-    #             if success:
-    #                 self.board.map_with_objects[row][col] = 0
-    #                 self.board.map_with_objects[target_row][target_col] = 3
-    #                 self.seeker_pos = (target_row, target_col)
+        # Đếm số lượng tường trong từng phần
+        walls_count = {
+            'top_left': sum(1 for r, c in top_left if self.map_with_objects[r][c] == 1),
+            'top_right': sum(1 for r, c in top_right if self.map_with_objects[r][c] == 1),
+            'bottom_left': sum(1 for r, c in bottom_left if self.map_with_objects[r][c] == 1),
+            'bottom_right': sum(1 for r, c in bottom_right if self.map_with_objects[r][c] == 1)
+        }
 
-    # Di chuyển khối vật cản  
-    def move_obstacle(self, direction, target_row, target_col):
-        obstacle_site = None
-        for i, obstacle in enumerate(self.board.obstacles):
-            if len(obstacle) == 4:
-                top, left, bottom, right = obstacle
-                if (target_col == left + 1 or target_col == right + 1) and (target_row >= top + 1 and target_row <= bottom + 1):
-                    obstacle_site = i
-                    break
-                if (target_row == top + 1 or target_row == bottom + 1) and (target_col >= left + 1 and target_col <= right + 1):
-                    obstacle_site = i
-                    break
-        
-        if obstacle_site is not None:
-            top, left, bottom, right = self.board.obstacles[obstacle_site]
-            top += 1
-            left += 1
-            right += 1
-            bottom += 1
+        # Sắp xếp các phần theo số lượng tường giảm dần
+        sorted_sections = sorted(walls_count.items(), key=lambda x: x[1], reverse=True)
 
-        if direction == 'up':
-            for i in range(left, right + 1):
-                if(top < 1 or self.board.map_with_objects[top - 1][i] in [1, 4]):
-                    return False
-            self.board.map_with_objects[top - 1][left:right + 1] = [4] * (right - left + 1)
-            self.board.map_with_objects[bottom][left:right + 1] = [0] * (right - left + 1)
-            self.board.obstacles[obstacle_site] = (top - 2, left - 1, bottom - 2, right - 1)
-        elif direction == 'down':
-            for i in range(left, right + 1):
-                if(bottom > self.board.n - 3 or self.board.map_with_objects[bottom + 1][i] in [1, 4]):
-                    return False
-            self.board.map_with_objects[bottom + 1][left:right + 1] = [4] * (right - left + 1)
-            self.board.map_with_objects[top][left:right + 1] = [0] * (right - left + 1)
-            self.board.obstacles[obstacle_site] = (top, left - 1, bottom, right - 1)
-        elif direction == 'left':
-            for i in range(top, bottom + 1):
-                if(left < 1 or self.board.map_with_objects[i][left - 1] in [1, 4]):
-                    return False
-            for i in range(top, bottom + 1):
-                self.board.map_with_objects[i][left - 1] = 4
-                self.board.map_with_objects[i][right] = 0
-            self.board.obstacles[obstacle_site] = (top - 1, left - 2, bottom - 1, right - 2)
-        elif direction == 'right':
-            for i in range(top, bottom + 1):
-                if(right > self.board.m - 3 or self.board.map_with_objects[i][right + 1] in [1, 4]):
-                    return False
-            for i in range(top, bottom + 1):
-                    self.board.map_with_objects[i][right + 1] = 4
-                    self.board.map_with_objects[i][left] = 0          
-            self.board.obstacles[obstacle_site] = (top - 1, left, bottom - 1, right)
-        return True
-'''
+        # Lấy vị trí của Seeker
+        seeker_row, seeker_col = self.pos_seeker
+
+        # Kiểm tra vị trí của Seeker thuộc phần nào
+        if seeker_row < center_row:
+            if seeker_col < center_col:
+                seeker_section = 'top_left'
+            else:
+                seeker_section = 'top_right'
+        else:
+            if seeker_col < center_col:
+                seeker_section = 'bottom_left'
+            else:
+                seeker_section = 'bottom_right'
+
+        # Tạo danh sách các phần được sắp xếp theo số lượng tường giảm dần, bắt đầu với 'center'
+        priority_directions = ['center']
+
+        # Biến đếm vị trí trong danh sách các phần
+        position = 1
+
+        # Loại bỏ phần chứa Seeker khỏi danh sách các phần và chèn nó vào cuối mảng
+        for section, _ in sorted_sections:
+            if section != seeker_section:
+                position += 1
+                if position % 2 == 1:
+                    priority_directions.append('center')
+                else:
+                    priority_directions.append(section)
+                
+
+        # Chèn "center" vào cuối danh sách
+        priority_directions.append('center')   
+        priority_directions.append(seeker_section)
+        priority_directions.append('center')
+
+        # Chuyển đổi danh sách các phần tử thành danh sách các tọa độ tương ứng
+        priority_coordinates = self.convert_to_coordinates(priority_directions)
+
+        # Trả về danh sách các phần được sắp xếp theo số lượng tường giảm dần
+        return priority_coordinates
+
+
+    def get_center_pos(self):
+        cx, cy = self.n // 2, self.m // 2
+        if self.map_with_objects[cx][cy] not in [1, 4]:
+            return (cx, cy)
+        else:
+            dx, dy = None
+            direction = [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]      
+            while self.map_with_objects[cx + dx, cy + dy] not in [1, 4]:   
+                for dx, dy in direction:
+                    if self.map_with_objects[cx + dx, cy + dy] not in [1, 4]:
+                        return (cx + dx, cy + dy)
+                direction *= 2
+
+
+                        

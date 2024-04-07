@@ -180,14 +180,44 @@ class Board:
         for section in sections:
             if section == 'center':
                 coordinates.append(self.get_center_pos())
+
             elif section == 'top_left':
                 coordinates.append((1, 1))
             elif section == 'top_right':
-                coordinates.append((1, self.m - 2))
+                coordinates.append((1, (self.m - 2)))
             elif section == 'bottom_left':
-                coordinates.append((self.n - 2, 1))
+                coordinates.append(((self.n - 2), 1))
             elif section == 'bottom_right':
-                coordinates.append((self.n - 2, self.m - 2))
+                coordinates.append(((self.n - 2), (self.m - 2)))
+
+            elif section == 'top':
+                coordinates.append((1, ((self.m - 2) // 2)))
+            elif section == 'left-top':
+                coordinates.append((1, ((self.m - 2) // 4)))
+            elif section == 'right-top':
+                coordinates.append((1, (3 * (self.m - 2) // 4)))
+
+            elif section == 'bottom':
+                coordinates.append(((self.n - 2), ((self.m - 2) // 2)))
+            elif section == 'left-bottom':
+                coordinates.append(((self.n - 2), ((self.m - 2) // 4)))
+            elif section == 'right-bottom':
+                coordinates.append(((self.n - 2), (3 * (self.m - 2) // 4)))
+
+            elif section == 'left':
+                coordinates.append(((self.n - 2) // 2, 1))
+            elif section == 'top-left':
+                coordinates.append(((self.n - 2) // 4, 1))
+            elif section == 'bottom-left':
+                coordinates.append(((3 * (self.n - 2) // 4), 1))      
+
+            elif section == 'right':
+                coordinates.append(((self.n - 2) // 2, self.m - 2))
+            elif section == 'top-right':
+                coordinates.append(((self.n - 2) // 4, self.m - 2))
+            elif section == 'bottom-right':
+                coordinates.append(((3 * (self.n - 2) // 4), self.m - 2))
+                
         return coordinates
 
     def get_priority_direction(self):
@@ -204,10 +234,10 @@ class Board:
         
         # Đếm số lượng tường trong từng phần
         walls_count = {
-            'top_left': sum(1 for r, c in top_left if self.map_with_objects[r][c] == 1),
-            'top_right': sum(1 for r, c in top_right if self.map_with_objects[r][c] == 1),
-            'bottom_left': sum(1 for r, c in bottom_left if self.map_with_objects[r][c] == 1),
-            'bottom_right': sum(1 for r, c in bottom_right if self.map_with_objects[r][c] == 1)
+            'top_left': sum(1 for r, c in top_left if self.map_with_objects[r][c] in [1, 4]),
+            'top_right': sum(1 for r, c in top_right if self.map_with_objects[r][c] in [1, 4]),
+            'bottom_left': sum(1 for r, c in bottom_left if self.map_with_objects[r][c] in [1, 4]),
+            'bottom_right': sum(1 for r, c in bottom_right if self.map_with_objects[r][c] in [1, 4])
         }
 
         # Sắp xếp các phần theo số lượng tường giảm dần
@@ -249,25 +279,40 @@ class Board:
         priority_directions.append(seeker_section)
         priority_directions.append('center')
 
+        # Chèn thêm các vị trí giữa mỗi cạnh
+        priority_directions.append('top')
+        priority_directions.append('bottom')
+        priority_directions.append('left')
+        priority_directions.append('right')
+        priority_directions.append('center')
+
+        # Chèn thêm các vị trí 1/4 mỗi cạnh
+        priority_directions.append('left-top')
+        priority_directions.append('left-bottom')
+        priority_directions.append('right-top')    
+        priority_directions.append('right-bottom')
+        priority_directions.append('top-left')
+        priority_directions.append('top-right')
+        priority_directions.append('bottom-left')    
+        priority_directions.append('bottom-right')
+        
         # Chuyển đổi danh sách các phần tử thành danh sách các tọa độ tương ứng
         priority_coordinates = self.convert_to_coordinates(priority_directions)
+        print(priority_coordinates)
 
         # Trả về danh sách các phần được sắp xếp theo số lượng tường giảm dần
         return priority_coordinates
 
-
+    # Xác định vị trí trung tâm map
     def get_center_pos(self):
         cx, cy = self.n // 2, self.m // 2
+        dx, dy = 0, 0
         if self.map_with_objects[cx][cy] not in [1, 4]:
             return (cx, cy)
-        else:
-            dx, dy = None
+        else:  
             direction = [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]      
-            while self.map_with_objects[cx + dx, cy + dy] not in [1, 4]:   
+            while self.map_with_objects[cx + dx][cy + dy] not in [1, 4]:   
                 for dx, dy in direction:
-                    if self.map_with_objects[cx + dx, cy + dy] not in [1, 4]:
+                    if self.map_with_objects[cx + dx][cy + dy] not in [1, 4]:
                         return (cx + dx, cy + dy)
                 direction *= 2
-
-
-                        

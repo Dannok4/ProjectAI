@@ -102,6 +102,9 @@ def level_1_2(board):
     done = False
     clock = pygame.time.Clock()
     while not done:
+        if len(all_hiders) == 0:
+            return
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True    
@@ -111,6 +114,7 @@ def level_1_2(board):
             # Thuật toán tìm kiếm
             board.pos_seeker, check_find_hider = seeker.Seeker_move(hider_announce, successors_list, step_list, all_hiders)                                     
             board.steps += 1 
+            score -= 1
             step_list += 1
 
             # Kiểm tra thay đổi hướng tìm kiếm
@@ -133,9 +137,6 @@ def level_1_2(board):
 
             # Cập nhật map
             board.draw_map(screen, seeker, all_hiders, countdown, score)           
-
-            if len(all_hiders) == 0:
-                return
             
             # Tạo annnounce 
             if board.steps % 5 == 0 and board.steps > 0:
@@ -144,6 +145,83 @@ def level_1_2(board):
             pygame.display.flip()
             clock.tick(5)    
 
+def level_3(board):
+    # Khởi tạo seeker, hiders
+    seeker = Seeker(board.pos_seeker[0], board.pos_seeker[1], (board.n, board.m), board)
+    all_hiders = [Hider(pos[0], pos[1]) for pos in board.pos_hiders]
+
+    # Khởi tạo các biến
+    goal = board.get_priority_direction()
+    successors_list = seeker.success(goal[0])
+    index_goal = 0
+    step_list = 0
+    score = 0
+    countdown = 300
+    hider_announce = []
+
+    # Tính kích thước màn hình
+    screen_width = board.m * (board.CELL_SIZE + MARGIN) + MARGIN * 3 + 200
+    screen_height = board.n * (board.CELL_SIZE + MARGIN) + MARGIN * 2
+    screen_size = (screen_width, screen_height)
+
+    # Tạo cửa sổ trò chơi
+    screen = pygame.display.set_mode(screen_size)
+    pygame.display.set_caption("Map Representation")
+
+    # Vẽ map
+    screen.fill(WHITE)
+    board.draw_map(screen, seeker, all_hiders, countdown, score)
+    pygame.display.flip()
+
+    # Tìm kiếm
+    done = False
+    clock = pygame.time.Clock()
+    while not done:
+        if len(all_hiders) == 0:
+            return
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                done = True    
+
+            check_find_hider = False
+
+            # Thuật toán tìm kiếm
+            board.pos_seeker, check_find_hider = seeker.Seeker_move(hider_announce, successors_list, step_list, all_hiders)                                     
+            board.steps += 1 
+            score -= 1
+            step_list += 1
+
+            # Kiểm tra thay đổi hướng tìm kiếm
+            if board.pos_seeker == successors_list[-1]:
+                step_list = 0
+                index_goal += 1
+                successors_list = seeker.success(goal[index_goal])
+            
+            # Tìm thấy hider
+            if check_find_hider:
+                # Cập nhật lại hướng tìm kiếm
+                step_list = 0   
+                successors_list = seeker.success(goal[index_goal])
+
+                # Cập nhật điểm, số lượng hiders
+                for hider in all_hiders:
+                    if hider.position[0] == seeker.position[1] and hider.position[1] == seeker.position[0]:
+                        all_hiders.remove(hider)
+                        score += 20
+
+            for i in range (len(all_hiders)):
+                all_hiders[i].movement_strategy(board)
+
+            # Cập nhật map
+            board.draw_map(screen, seeker, all_hiders, countdown, score)           
+
+            # Tạo annnounce 
+            if board.steps % 5 == 0 and board.steps > 0:
+                hider_announce = board.draw_announce(screen, all_hiders, hider_announce)
+
+            pygame.display.flip()
+            clock.tick(5)
     
     
 def run_game():
@@ -154,12 +232,26 @@ def run_game():
     print("4. Level 4")
     choice = input("Enter your choice (1-4): ")
 
-    if choice == '1':
+    if choice == '1' or choice == '2':
         pygame.init()
-        filename = r"c:\Users\HO TIEN PHAT\Documents\GitHub\ProjectAI\ProjectAI\map1_1.txt"
+        filename = r"map1_1.txt"
         board = Board(False, filename)
 
         level_1_2(board)
+
+        print("done")
+        while True:    
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN or event.type == pygame.QUIT:
+                    pygame.quit()
+                    quit()  # Thoát khỏi chương trình hoàn toàn
+                    
+    if choice == '3':
+        pygame.init()
+        filename = r"map1_1.txt"
+        board = Board(False, filename)
+
+        level_3(board)
 
         print("done")
         while True:    

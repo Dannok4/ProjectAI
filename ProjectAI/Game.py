@@ -3,6 +3,7 @@ from Hider import *
 from Seeker import *
 import pygame
 
+'''
 def level_1_2(board):
 # create level
     all_announce_position = []
@@ -33,6 +34,7 @@ def level_1_2(board):
         # hàm vẽ map
         
     # in ra điểm
+'''
 
 def level3(board):
 # create level
@@ -67,6 +69,82 @@ def level3(board):
         # hàm vẽ map
         
     # in ra điểm
+
+def level_1_2(board):
+    # Khởi tạo seeker, hiders
+    seeker = Seeker(board.pos_seeker[0], board.pos_seeker[1], (board.n, board.m), board)
+    all_hiders = [Hider(pos[0], pos[1]) for pos in board.pos_hiders]
+
+    # Khởi tạo các biến
+    goal = board.get_priority_direction()
+    successors_list = seeker.success(goal[0])
+    index_goal = 0
+    step_list = 0
+    score = 0
+    countdown = 300
+    hider_announce = []
+
+    # Tính kích thước màn hình
+    screen_width = board.m * (board.CELL_SIZE + MARGIN) + MARGIN * 3 + 200
+    screen_height = board.n * (board.CELL_SIZE + MARGIN) + MARGIN * 2
+    screen_size = (screen_width, screen_height)
+
+    # Tạo cửa sổ trò chơi
+    screen = pygame.display.set_mode(screen_size)
+    pygame.display.set_caption("Map Representation")
+
+    # Vẽ map
+    screen.fill(WHITE)
+    board.draw_map(screen, seeker, all_hiders, countdown, score)
+    pygame.display.flip()
+
+    # Tìm kiếm
+    done = False
+    clock = pygame.time.Clock()
+    while not done:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                done = True    
+
+            check_find_hider = False
+
+            # Thuật toán tìm kiếm
+            board.pos_seeker, check_find_hider = seeker.Seeker_move(hider_announce, successors_list, step_list, all_hiders)                                     
+            board.steps += 1 
+            step_list += 1
+
+            # Kiểm tra thay đổi hướng tìm kiếm
+            if board.pos_seeker == successors_list[-1]:
+                step_list = 0
+                index_goal += 1
+                successors_list = seeker.success(goal[index_goal])
+            
+            # Tìm thấy hider
+            if check_find_hider:
+                # Cập nhật lại hướng tìm kiếm
+                step_list = 0   
+                successors_list = seeker.success(goal[index_goal])
+
+                # Cập nhật điểm, số lượng hiders
+                for hider in all_hiders:
+                    if hider.position[0] == seeker.position[1] and hider.position[1] == seeker.position[0]:
+                        all_hiders.remove(hider)
+                        score += 20
+
+            # Cập nhật map
+            board.draw_map(screen, seeker, all_hiders, countdown, score)           
+
+            if len(all_hiders) == 0:
+                return
+            
+            # Tạo annnounce 
+            if board.steps % 5 == 0 and board.steps > 0:
+                hider_announce = board.draw_announce(screen, all_hiders, hider_announce)
+
+            pygame.display.flip()
+            clock.tick(5)    
+
+    
     
 def run_game():
     print("Select a level:") # chọn level
@@ -76,87 +154,15 @@ def run_game():
     print("4. Level 4")
     choice = input("Enter your choice (1-4): ")
 
-    # if choice == 1 or choice == 2:
-    #     # Bắt đầu trò chơi với màn chơi 1, 2
-    #     pass
-    # elif choice == 3:
-    #     # Bắt đầu trò chơi với màn chơi 3
-    #     pass
-    # elif choice == 4:
-    #     # Bắt đầu trò chơi với màn chơi 4
-    #     pass
-    # else:
-    #     print("Invalid choice.")
-    #     sys.exit()
-    
     if choice == '1':
         pygame.init()
         filename = r"c:\Users\HO TIEN PHAT\Documents\GitHub\ProjectAI\ProjectAI\map1_1.txt"
         board = Board(False, filename)
 
-        seeker = Seeker(board.pos_seeker[0], board.pos_seeker[1], (board.n, board.m), board)
-        all_hiders = [Hider(pos[0], pos[1]) for pos in board.pos_hiders]
-        num_hiders = len(all_hiders)
-        finded_hider = 0
+        level_1_2(board)
 
-        # Calculate the size of the game window based on the size of the game board and the cell size
-        screen_width = board.m * (board.CELL_SIZE + MARGIN) + MARGIN * 2
-        screen_height = board.n * (board.CELL_SIZE + MARGIN) + MARGIN * 2
-        screen_size = (screen_width, screen_height)
-
-        # Create the game window
-        screen = pygame.display.set_mode(screen_size)
-        pygame.display.set_caption("Map Representation")
-
-        # Draw the initial game map
-        screen.fill(WHITE)
-        seeker = Seeker(board.pos_seeker[0], board.pos_seeker[1], (board.n, board.m), board)
-        board.draw_map(screen, board.CELL_SIZE)
-        pygame.display.flip()
-
-        done = False
-        clock = pygame.time.Clock()
-        while not done and finded_hider < num_hiders:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    done = True    
-
-                hider_announce = []
-                # Move seeker using the algorithm
-                board.pos_seeker, finded_hider = seeker.Seeker_move(hider_announce)                                     
-                board.steps += 1 
-
-
-                screen.fill(WHITE)
-                seeker = Seeker(board.pos_seeker[0], board.pos_seeker[1], (board.n, board.m), board)
-                 
-                # Draw the game map
-                board.draw_map(screen, board.CELL_SIZE)
-                board.draw_vision(screen, board.CELL_SIZE)
-
-                #screen.fill(WHITE)
-                #seeker = Seeker(board.pos_seeker[0], board.pos_seeker[1], (board.n, board.m), board)
-                #board.draw_map(screen, board.CELL_SIZE)
-
-                
-                # Draw announcements for hiders
-                if board.steps % 5 == 0 and board.steps > 0:
-                    hider_announce.clear()
-                    for hider_pos in board.pos_hiders:
-                        hider = Hider(hider_pos[0], hider_pos[1])
-                        announce_pos = hider.announce(board)
-                        hider_announce.append(announce_pos)
-                        if announce_pos is not None:
-                            pygame.draw.rect(screen, PINK,
-                                            [(MARGIN + board.CELL_SIZE) * announce_pos[0] + MARGIN,
-                                            (MARGIN + board.CELL_SIZE) * announce_pos[1] + MARGIN,
-                                            board.CELL_SIZE, board.CELL_SIZE])
-                        
-                pygame.display.flip()
-                clock.tick(1)
-        
-
-        while True:
+        print("done")
+        while True:    
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN or event.type == pygame.QUIT:
                     pygame.quit()

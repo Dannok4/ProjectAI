@@ -36,40 +36,39 @@ def level_1_2(board):
     # in ra điểm
 '''
 
-# def level3(board):
-# # create level
-#     all_announce_position = []
+def level3(board):
+# create level
+    all_announce_position = []
     
-#     seeker = Seeker(board.pos_seeker)
+    seeker = Seeker(board.pos_seeker)
     
-#     all_hiders = [] # create all hiders
-#     for i in range(len(board.pos_hiders)):
-#         hider_i = Hider(board.pos_hiders[i]) # add all hiders
-#         all_hiders.append(hider_i)
+    all_hiders = [] # create all hiders
+    for i in range(len(board.pos_hiders)):
+        hider_i = Hider(board.pos_hiders[i]) # add all hiders
+        all_hiders.append(hider_i)
      
-#     # hàm vẽ map
+    # hàm vẽ map
 
-#     while len(all_hiders) != 0: # còn hider còn dí
-#         if board.steps != 0 and board.steps % 5 == 0: # neu la luot thu 5 moi vong -> announce
-#             for i in range(len(all_hiders)):
-#                 all_announce_position.append(all_hiders[i].announce(board))
+    while len(all_hiders) != 0: # còn hider còn dí
+        if board.steps != 0 and board.steps % 5 == 0: # neu la luot thu 5 moi vong -> announce
+            for i in range(len(all_hiders)):
+                all_announce_position.append(all_hiders[i].announce(board))
                 
-#         for i in range(all_hiders):
-#             all_hiders[i].movement_strategy(board) # di chuyển các hiders
+        for i in range(all_hiders):
+            all_hiders[i].movement_strategy(board) # di chuyển các hiders
             
-#         board.pos_seeker = seeker.Seeker_move # di chuyển seeker tìm hider(s)
-#         seeker.point -= 1
-#         board.steps += 1
+        board.pos_seeker = seeker.Seeker_move # di chuyển seeker tìm hider(s)
+        seeker.point -= 1
+        board.steps += 1
         
-#         for j in range(len(all_hiders)):
-#             if all_hiders[j].position == seeker.position:
-#                 all_hiders.pop(j)
-#                 seeker.point += 20
+        for j in range(len(all_hiders)):
+            if all_hiders[j].position == seeker.position:
+                all_hiders.pop(j)
+                seeker.point += 20
         
-#         # hàm vẽ map
+        # hàm vẽ map
         
-#     # in ra điểm
-
+    # in ra điểm
 
 def level_1_2(board):
     # Khởi tạo seeker, hiders
@@ -116,7 +115,7 @@ def level_1_2(board):
             check_find_announce = False
 
             # Thuật toán tìm kiếm
-            board.pos_seeker, check_find_hider = seeker.Seeker_move(board, hider_announce, successors_list, step_list, all_hiders)                                     
+            board.pos_seeker, check_find_hider, check_find_announce = seeker.Seeker_move(hider_announce, successors_list, step_list, all_hiders)                                     
             board.steps += 1 
             score -= 1
             step_list += 1
@@ -150,13 +149,6 @@ def level_1_2(board):
             # Tạo annnounce 
             if board.steps % 5 == 0 and board.steps > 0:
                 hider_announce = board.draw_announce(screen, all_hiders, hider_announce)
-            elif board.steps > 5: # draw current announce
-                for announce in hider_announce:
-                    if announce not in all_hiders and announce != board.pos_seeker: 
-                        pygame.draw.rect(screen, PINK,
-                                        [(MARGIN + board.CELL_SIZE) * announce[0] + MARGIN,
-                                        (MARGIN + board.CELL_SIZE) * announce[1] + MARGIN,
-                                        board.CELL_SIZE, board.CELL_SIZE])                    
 
             pygame.display.flip()
             clock.tick(5)    
@@ -206,7 +198,7 @@ def level_3(board):
             check_find_announce = False
 
             # Thuật toán tìm kiếm
-            board.pos_seeker, check_find_hider = seeker.Seeker_move(board, hider_announce, successors_list, step_list, all_hiders)                                     
+            board.pos_seeker, check_find_hider, check_find_announce = seeker.Seeker_move(hider_announce, successors_list, step_list, all_hiders)                                     
             board.steps += 1 
             score -= 1
             step_list += 1
@@ -243,14 +235,7 @@ def level_3(board):
             # Tạo annnounce 
             if board.steps % 5 == 0 and board.steps > 0:
                 hider_announce = board.draw_announce(screen, all_hiders, hider_announce)
-            elif board.steps > 5: # draw current announce
-                for announce in hider_announce:
-                    if announce not in all_hiders and announce != board.pos_seeker: 
-                        pygame.draw.rect(screen, PINK,
-                                        [(MARGIN + board.CELL_SIZE) * announce[0] + MARGIN,
-                                        (MARGIN + board.CELL_SIZE) * announce[1] + MARGIN,
-                                        board.CELL_SIZE, board.CELL_SIZE])  
-                        
+
             pygame.display.flip()
             clock.tick(5)
     
@@ -260,10 +245,6 @@ def run_game():
     print("1. Level 1")
     print("2. Level 2")
     print("3. Level 3")
-    print("")
-    print("** Please notice that you should move mouse non-stop until done to make it run **")
-    print("** We are very sorry for this inconvenience **")
-    print("")
     choice = input("Enter your choice (1-3): ")
 
     if choice == '1' or choice == '2':

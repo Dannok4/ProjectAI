@@ -298,7 +298,6 @@ class Board:
         
         # Chuyển đổi danh sách các phần tử thành danh sách các tọa độ tương ứng
         priority_coordinates = self.convert_to_coordinates(priority_directions)
-        print(priority_coordinates)
 
         # Trả về danh sách các phần được sắp xếp theo số lượng tường giảm dần
         return priority_coordinates

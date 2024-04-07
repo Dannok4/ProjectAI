@@ -113,6 +113,7 @@ def level_1_2(board):
                 done = True    
 
             check_find_hider = False
+            check_find_announce = False
 
             # Thuật toán tìm kiếm
             board.pos_seeker, check_find_hider = seeker.Seeker_move(board, hider_announce, successors_list, step_list, all_hiders)                                     
@@ -137,6 +138,11 @@ def level_1_2(board):
                     if hider.position[0] == seeker.position[1] and hider.position[1] == seeker.position[0]:
                         all_hiders.remove(hider)
                         score += 20
+
+            # Tìm thấy announce
+            if check_find_announce:
+                step_list = 0
+                successors_list = seeker.success(goal[index_goal])
 
             # Cập nhật map
             board.draw_map(screen, seeker, all_hiders, countdown, score)           
@@ -197,6 +203,7 @@ def level_3(board):
                 done = True    
 
             check_find_hider = False
+            check_find_announce = False
 
             # Thuật toán tìm kiếm
             board.pos_seeker, check_find_hider = seeker.Seeker_move(board, hider_announce, successors_list, step_list, all_hiders)                                     
@@ -221,6 +228,11 @@ def level_3(board):
                     if hider.position[0] == seeker.position[1] and hider.position[1] == seeker.position[0]:
                         all_hiders.remove(hider)
                         score += 20
+
+            # Tìm thấy announce
+            if check_find_announce:
+                step_list = 0
+                successors_list = seeker.success(goal[index_goal])
 
             for i in range (len(all_hiders)):
                 all_hiders[i].movement_strategy(board) # move hiders

@@ -1,5 +1,5 @@
 ﻿import random
-from Board import Board
+from Board import *
 
 class Hider:
     def __init__(self, x, y):

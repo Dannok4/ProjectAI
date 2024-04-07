@@ -383,6 +383,7 @@ class Seeker:
     # Kiểm tra xem Hider có trong tầm nhìn của Seeker hay không
         hider_position = self.seeker_can_see_hider(all_hiders)
         find_hider = False
+        find_announce = False
         
         if hider_position:
             # Nếu Hider nằm trong tầm nhìn của Seeker:
@@ -399,13 +400,13 @@ class Seeker:
                 # Nếu có thông báo từ Hider và nằm trong bán kính lắng nghe, di chuyển theo thông báo
                 path = self.a_star_search_with_path_update(self.position, announcePosition, self.manhattan_distance)
                 if path:
-                    next_position = path[1]  # Vị trí tiếp theo trong đường đi đến vị trí thông báo
+                    next_position = path[0]  # Vị trí tiếp theo trong đường đi đến vị trí thông báo
                     self.position = next_position
+                    find_announce = True
             else:
                 # Nếu không có thông báo từ Hider, di chuyển theo các hướng có thể
                 if successors_list:
                     next_position = successors_list[step_list] # Chọn bước di chuyển đầu tiên
                     self.position = next_position
             
-        return self.position, find_hider
-
+        return self.position, find_hider, find_announce

@@ -4,6 +4,7 @@ from Board import *
 class Hider:
     def __init__(self, x, y):
         self.position = (x, y) # Starting position
+        self.old_position = self.position
         self.announce_position = (-1, 0)
         
     def check_valid_move(self, board, x, y, direction): # return true if valid movement     

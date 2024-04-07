@@ -397,7 +397,7 @@ class Seeker:
             announce_exists, announcePosition = self.check_announce_in_listening_radius(self.position, announce_position, 3)
             if announce_exists:
                 # Nếu có thông báo từ Hider và nằm trong bán kính lắng nghe, di chuyển theo thông báo
-                path = self.a_star_search_with_path_update(self.position, announcePosition, self.manhattan_distance, self.neighbors)
+                path = self.a_star_search_with_path_update(self.position, announcePosition, self.manhattan_distance)
                 if path:
                     next_position = path[1]  # Vị trí tiếp theo trong đường đi đến vị trí thông báo
                     self.position = next_position

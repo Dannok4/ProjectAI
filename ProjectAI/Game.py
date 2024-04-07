@@ -103,6 +103,8 @@ def level_1_2(board):
     clock = pygame.time.Clock()
     while not done:
         if len(all_hiders) == 0:
+            print("done, score is: ")
+            print(score)
             return
         
         for event in pygame.event.get():
@@ -178,6 +180,8 @@ def level_3(board):
     clock = pygame.time.Clock()
     while not done:
         if len(all_hiders) == 0:
+            print("done, score is: ")
+            print(score)
             return
         
         for event in pygame.event.get():
@@ -211,7 +215,7 @@ def level_3(board):
                         score += 20
 
             for i in range (len(all_hiders)):
-                all_hiders[i].movement_strategy(board)
+                all_hiders[i].movement_strategy(board) # move hiders
 
             # Cập nhật map
             board.draw_map(screen, seeker, all_hiders, countdown, score)           
@@ -229,8 +233,7 @@ def run_game():
     print("1. Level 1")
     print("2. Level 2")
     print("3. Level 3")
-    print("4. Level 4")
-    choice = input("Enter your choice (1-4): ")
+    choice = input("Enter your choice (1-3): ")
 
     if choice == '1' or choice == '2':
         pygame.init()
@@ -239,7 +242,6 @@ def run_game():
 
         level_1_2(board)
 
-        print("done")
         while True:    
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN or event.type == pygame.QUIT:
@@ -253,7 +255,6 @@ def run_game():
 
         level_3(board)
 
-        print("done")
         while True:    
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN or event.type == pygame.QUIT:

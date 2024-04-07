@@ -319,18 +319,23 @@ class Seeker:
             
         return None
 
-    def check_announce_in_listening_radius(self, seeker_position, hider_announce, radius_Vision):
+    def check_announce_in_listening_radius(self, board, seeker_position, hider_announce, radius_Vision):
         x_seeker, y_seeker = seeker_position
         for announce in hider_announce:
             if announce:
                 x_announce, y_announce = announce
 
-            # Tính khoảng cách Manhattan giữa seeker và tín hiệu thông báo từ hider
-            distance = abs(x_seeker - x_announce) + abs(y_seeker - y_announce)
+            for i in range(max(y_seeker - radius_Vision, 0), min(y_seeker + radius_Vision, board.n - 1) + 1):
+                for j in range(max(x_seeker - 3, 0), min(x_seeker + 3, board.m - 1) + 1):
+                    if j == x_announce and i == y_announce:
+                        return True, announce
+                    
+        #     # Tính khoảng cách Manhattan giữa seeker và tín hiệu thông báo từ hider
+        #     distance = abs(x_seeker - x_announce) + abs(y_seeker - y_announce)
 
-            # Nếu khoảng cách nhỏ hơn hoặc bằng bán kính lắng nghe (radius_Vision), trả về True và vị trí của thông báo
-            if distance <= radius_Vision:
-                return True, announce
+        #     # Nếu khoảng cách nhỏ hơn hoặc bằng bán kính lắng nghe (radius_Vision), trả về True và vị trí của thông báo
+        #     if distance <= radius_Vision:
+        #         return True, announce
                            
         return False, None
         
@@ -379,7 +384,7 @@ class Seeker:
     def success(self, goal):
         return self.a_star_search_with_path_update(self.position, goal, self.manhattan_distance)
 
-    def Seeker_move(self, announce_position, successors_list, step_list, all_hiders):
+    def Seeker_move(self, board, announce_position, successors_list, step_list, all_hiders):
     # Kiểm tra xem Hider có trong tầm nhìn của Seeker hay không
         hider_position = self.seeker_can_see_hider(all_hiders)
         find_hider = False
@@ -394,7 +399,7 @@ class Seeker:
                     find_hider = True
         else:
             # Nếu Hider không có trong tầm nhìn, kiểm tra xem có thông báo từ Hider không
-            announce_exists, announcePosition = self.check_announce_in_listening_radius(self.position, announce_position, 3)
+            announce_exists, announcePosition = self.check_announce_in_listening_radius(board, self.position, announce_position, 3)
             if announce_exists:
                 # Nếu có thông báo từ Hider và nằm trong bán kính lắng nghe, di chuyển theo thông báo
                 path = self.a_star_search_with_path_update(self.position, announcePosition, self.manhattan_distance)

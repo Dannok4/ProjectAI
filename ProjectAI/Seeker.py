@@ -324,7 +324,7 @@ class Seeker:
         for announce in hider_announce:
             if announce:
                 x_announce, y_announce = announce
-
+                    
             # Tính khoảng cách Manhattan giữa seeker và tín hiệu thông báo từ hider
             distance = abs(x_seeker - x_announce) + abs(y_seeker - y_announce)
 
